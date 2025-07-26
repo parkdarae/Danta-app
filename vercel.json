@@ -1,9 +1,4 @@
 {
-  "name": "danta-trader-app",
-  "buildCommand": "npm run build",
-  "outputDirectory": "build",
-  "installCommand": "npm install",
-  "framework": "create-react-app",
   "rewrites": [
     {
       "source": "/(.*)",
@@ -12,50 +7,11 @@
   ],
   "headers": [
     {
-      "source": "/analysis-worker.js",
-      "headers": [
-        {
-          "key": "cache-control",
-          "value": "public, max-age=3600"
-        },
-        {
-          "key": "content-type", 
-          "value": "application/javascript"
-        }
-      ]
-    },
-    {
       "source": "/static/(.*)",
       "headers": [
         {
-          "key": "cache-control",
+          "key": "Cache-Control",
           "value": "public, max-age=31536000, immutable"
-        }
-      ]
-    },
-    {
-      "source": "/(.*\\.(js|css|png|jpg|jpeg|gif|ico|svg))",
-      "headers": [
-        {
-          "key": "cache-control",
-          "value": "public, max-age=86400"
-        }
-      ]
-    },
-    {
-      "source": "/(.*)",
-      "headers": [
-        {
-          "key": "X-Content-Type-Options",
-          "value": "nosniff"
-        },
-        {
-          "key": "X-Frame-Options",
-          "value": "DENY"
-        },
-        {
-          "key": "X-XSS-Protection",
-          "value": "1; mode=block"
         }
       ]
     }
