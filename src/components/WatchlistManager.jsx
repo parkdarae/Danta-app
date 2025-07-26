@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 
 const WatchlistManager = ({ darkMode = false, onWatchlistChange }) => {
-  const [watchlist, setWatchlist] = useLocalStorage('user_watchlist', ['ACEL', 'EAGLE', 'AEGL', 'AAPL', 'TSLA']);
+  const [watchlist, setWatchlist] = useLocalStorage('user_watchlist', ['UAVS', 'AAPL', 'TSLA', 'NVDA', 'MSFT']);
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [showAddForm, setShowAddForm] = useState(false);
@@ -29,12 +29,16 @@ const WatchlistManager = ({ darkMode = false, onWatchlistChange }) => {
   // 주식 검색 (확장된 목록)
   const searchStocks = (query) => {
     const allStocks = [
-      // 에이지이글 관련
-      { symbol: 'ACEL', name: 'Accel Entertainment Inc', market: 'NASDAQ', category: '에이지이글' },
-      { symbol: 'EAGLE', name: 'Eagle Pharmaceuticals Inc', market: 'NASDAQ', category: '에이지이글' },
-      { symbol: 'AEGL', name: 'Aeglea BioTherapeutics Inc', market: 'NASDAQ', category: '에이지이글' },
-      { symbol: 'AGE', name: 'AgeX Therapeutics Inc', market: 'NASDAQ', category: '에이지이글' },
-      { symbol: 'AERI', name: 'Aerie Pharmaceuticals Inc', market: 'NASDAQ', category: '에어리얼' },
+      // 🎯 에이지이글에어리얼 시스템스 - 정확한 매핑
+      { symbol: 'UAVS', name: 'AgEagle Aerial Systems Inc', market: 'NYSE American', category: '에이지이글에어리얼시스템스' },
+      
+      // 항공우주/드론 관련 (에이지이글과 유사 섹터)
+      { symbol: 'BA', name: 'Boeing Co', market: 'NYSE', category: '항공우주' },
+      { symbol: 'RTX', name: 'Raytheon Technologies Corp', market: 'NYSE', category: '항공우주' },
+      { symbol: 'LMT', name: 'Lockheed Martin Corp', market: 'NYSE', category: '방산' },
+      { symbol: 'AVAV', name: 'AeroVironment Inc', market: 'NASDAQ', category: '드론' },
+      { symbol: 'KTOS', name: 'Kratos Defense & Security Solutions', market: 'NASDAQ', category: '방산' },
+      { symbol: 'PLTR', name: 'Palantir Technologies Inc', market: 'NYSE', category: '데이터분석' },
       
       // 주요 미국 주식
       { symbol: 'AAPL', name: 'Apple Inc', market: 'NASDAQ', category: 'Tech' },

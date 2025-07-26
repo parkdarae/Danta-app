@@ -27,6 +27,8 @@ import SimpleTOSTable from '../components/SimpleTOSTable';
 import WatchlistManager from '../components/WatchlistManager';
 import PortfolioOCR from '../components/PortfolioOCR';
 import EnhancedNewsAnalyzer from '../components/EnhancedNewsAnalyzer';
+import EnhancedStockSearch from '../components/EnhancedStockSearch';
+import StockAlertSystem from '../components/StockAlertSystem';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { STORAGE_KEYS, STOCKS } from '../utils/constants';
 
@@ -38,7 +40,7 @@ function MainPage() {
   const [darkMode, setDarkMode] = useLocalStorage(STORAGE_KEYS.DARK_MODE, false);
   const [miningResults, setMiningResults] = useState(null);
   const [currentCategory, setCurrentCategory] = useLocalStorage('current_category', 'trading');
-  const [userWatchlist, setUserWatchlist] = useState(['ACEL', 'EAGLE', 'AEGL', 'AAPL', 'TSLA', 'NVDA', 'MSFT']);
+  const [userWatchlist, setUserWatchlist] = useState(['UAVS', 'AAPL', 'TSLA', 'NVDA', 'MSFT', 'GOOGL', 'META']);
   const [userPortfolio, setUserPortfolio] = useState([]);
 
   const toggleDarkMode = useCallback(() => {
@@ -66,8 +68,13 @@ function MainPage() {
             <TutorialHelper darkMode={darkMode} />
             <CharacterReaction emotion={emotion} darkMode={darkMode} />
             <EmotionButtons onSelect={handleEmotion} darkMode={darkMode} />
-            <RealtimeStockSearch 
-              onStockSelect={(stockData) => setSelectedStock(stockData.name)} 
+            <EnhancedStockSearch 
+              onStockSelect={(stockData) => setSelectedStock(stockData.name || stockData.symbol)} 
+              onWatchlistAdd={(stock) => {
+                if (!userWatchlist.includes(stock.symbol)) {
+                  setUserWatchlist([...userWatchlist, stock.symbol]);
+                }
+              }}
               darkMode={darkMode}
               selectedStock={selectedStock}
             />
@@ -76,6 +83,10 @@ function MainPage() {
               onWatchlistChange={handleWatchlistChange}
             />
             <SimpleTOSTable 
+              darkMode={darkMode}
+              watchlist={userWatchlist}
+            />
+            <StockAlertSystem 
               darkMode={darkMode}
               watchlist={userWatchlist}
             />

@@ -244,12 +244,12 @@ class FreeUSStockAPI {
   // 모의 데이터 생성 (API 실패 시)
   generateMockUSStockData(symbol) {
     const mockCompanies = {
-      // 에이지이글에어리얼사 관련 실제 미국 상장 주식들
-      'ACEL': { name: 'Accel Entertainment Inc', basePrice: 12.50, sector: 'Gaming & Entertainment' },
-      'EAGLE': { name: 'Eagle Pharmaceuticals Inc', basePrice: 45.30, sector: 'Pharmaceuticals' },
-      'AEGL': { name: 'Aeglea BioTherapeutics Inc', basePrice: 2.15, sector: 'Biotechnology' },
-      'AGE': { name: 'AgeX Therapeutics Inc', basePrice: 0.85, sector: 'Biotechnology' },
-      'AERI': { name: 'Aerie Pharmaceuticals Inc', basePrice: 8.75, sector: 'Pharmaceuticals' },
+      // 🎯 에이지이글에어리얼 시스템스 - 정확한 데이터
+      'UAVS': { name: 'AgEagle Aerial Systems Inc', basePrice: 2.45, sector: 'Aerospace & Defense' },
+      
+      // 관련 항공우주/드론 주식들
+      'AVAV': { name: 'AeroVironment Inc', basePrice: 102.35, sector: 'Aerospace & Defense' },
+      'KTOS': { name: 'Kratos Defense & Security Solutions', basePrice: 18.45, sector: 'Aerospace & Defense' },
       
       // 주요 미국 주식들
       'AAPL': { name: 'Apple Inc', basePrice: 195.50, sector: 'Technology' },
@@ -299,12 +299,14 @@ class FreeUSStockAPI {
   // 모의 검색 결과
   getMockSearchResults(query) {
     const mockResults = [
-      // 에이지이글에어리얼사 관련 주식들 (우선순위)
-      { symbol: 'ACEL', name: 'Accel Entertainment Inc', market: 'NASDAQ', sector: 'Gaming', keywords: ['accel', 'entertainment', '에이지이글', 'eagle'] },
-      { symbol: 'EAGLE', name: 'Eagle Pharmaceuticals Inc', market: 'NASDAQ', sector: 'Pharma', keywords: ['eagle', 'pharmaceuticals', '에이지이글', '독수리'] },
-      { symbol: 'AEGL', name: 'Aeglea BioTherapeutics Inc', market: 'NASDAQ', sector: 'Biotech', keywords: ['aeglea', 'bio', 'eagle', '에이지이글'] },
-      { symbol: 'AGE', name: 'AgeX Therapeutics Inc', market: 'NASDAQ', sector: 'Biotech', keywords: ['age', 'therapeutics', '에이지', 'agex'] },
-      { symbol: 'AERI', name: 'Aerie Pharmaceuticals Inc', market: 'NASDAQ', sector: 'Pharma', keywords: ['aerie', 'aerial', '에어리얼', 'pharmaceuticals'] },
+      // 🎯 에이지이글에어리얼 시스템스 - 최우선순위
+      { symbol: 'UAVS', name: 'AgEagle Aerial Systems Inc', market: 'NYSE American', sector: 'Aerospace', keywords: ['uavs', 'ageagle', 'aerial', 'systems', '에이지이글', '에이지이글에어리얼', '에이지이글에어리얼시스템스', 'drone', 'uav'] },
+      
+      // 관련 항공우주/드론 주식들
+      { symbol: 'AVAV', name: 'AeroVironment Inc', market: 'NASDAQ', sector: 'Aerospace', keywords: ['avav', 'aerovironment', 'drone', 'aerial', '드론'] },
+      { symbol: 'KTOS', name: 'Kratos Defense & Security Solutions', market: 'NASDAQ', sector: 'Defense', keywords: ['ktos', 'kratos', 'defense', '방산'] },
+      { symbol: 'BA', name: 'Boeing Co', market: 'NYSE', sector: 'Aerospace', keywords: ['boeing', 'aerospace', '보잉', '항공'] },
+      { symbol: 'RTX', name: 'Raytheon Technologies Corp', market: 'NYSE', sector: 'Aerospace', keywords: ['rtx', 'raytheon', 'aerospace', '항공우주'] },
       
       // 항공/에어리얼 관련
       { symbol: 'AAL', name: 'American Airlines Group', market: 'NASDAQ', sector: 'Airlines', keywords: ['american', 'airlines', 'aerial', '항공', '에어리얼'] },

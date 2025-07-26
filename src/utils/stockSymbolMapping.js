@@ -1,9 +1,17 @@
 // 한국어 종목명 → 미국 주식 심볼 매핑
 export const koreanToUSSymbolMapping = {
-  // 에이지이글에어리얼사 관련 심볼들
-  '에이지이글': ['ACEL', 'EAGLE', 'AEGL', 'AGE'],
-  '에이지이글에어리얼': ['ACEL', 'EAGLE', 'AEGL', 'AERI'],
-  '에이지이글에어리얼사': ['ACEL', 'EAGLE', 'AEGL', 'AERI'],
+  // 에이지이글에어리얼 시스템스 - 정확한 매핑
+  '에이지이글': ['UAVS'],  // AgEagle Aerial Systems Inc
+  '에이지이글에어리얼': ['UAVS'],
+  '에이지이글에어리얼사': ['UAVS'],
+  '에이지이글에어리얼시스템스': ['UAVS'],
+  '에이지이글에어리얼 시스템스': ['UAVS'],
+  'AgEagle': ['UAVS'],
+  'AgEagle Aerial Systems': ['UAVS'],
+  
+  // 기타 유사 항공/드론 관련 주식들 (참고용)
+  '드론': ['UAVS', 'ACEL', 'PLTR', 'BA'],
+  '항공시스템': ['UAVS', 'BA', 'RTX', 'LMT'],
   
   // 기타 한국어로 알려진 미국 주식들
   '애플': 'AAPL',

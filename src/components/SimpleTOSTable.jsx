@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import freeUSStockAPI from '../services/freeUSStockAPI';
 
-const SimpleTOSTable = ({ darkMode = false, watchlist = ['ACEL', 'EAGLE', 'AEGL', 'AAPL', 'TSLA', 'NVDA', 'MSFT'] }) => {
+const SimpleTOSTable = ({ darkMode = false, watchlist = ['UAVS', 'AAPL', 'TSLA', 'NVDA', 'MSFT', 'GOOGL', 'META'] }) => {
   const [stockData, setStockData] = useState({});
   const [loading, setLoading] = useState(true);
   const [lastUpdate, setLastUpdate] = useState(new Date());
@@ -182,8 +182,8 @@ const SimpleTOSTable = ({ darkMode = false, watchlist = ['ACEL', 'EAGLE', 'AEGL'
                         borderRadius: '6px',
                         border: `2px solid ${selectedStocks.has(stock.symbol) ? theme.accent : 'transparent'}`
                       }}>
-                        {stock.symbol}
-                        {stock.symbol.includes('EAGLE') || stock.symbol === 'ACEL' || stock.symbol === 'AEGL' ? ' 🎯' : ''}
+                                                {stock.symbol}
+                         {stock.symbol === 'UAVS' ? ' 🎯🚁' : stock.symbol.includes('EAGLE') || stock.symbol === 'ACEL' || stock.symbol === 'AEGL' ? ' 🎯' : ''}
                       </div>
                     </div>
                   </td>
@@ -251,7 +251,7 @@ const SimpleTOSTable = ({ darkMode = false, watchlist = ['ACEL', 'EAGLE', 'AEGL'
         color: theme.subtext
       }}>
         <div>
-          💡 <strong>에이지이글에어리얼사</strong> 관련 미국 주식 포함
+          💡 <strong>에이지이글에어리얼 시스템스 (UAVS)</strong> 관련 미국 주식 포함
           {selectedStocks.size > 0 && (
             <span style={{ 
               marginLeft: '10px', 

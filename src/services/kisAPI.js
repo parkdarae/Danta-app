@@ -87,14 +87,17 @@ class KISAPIService {
     });
   }
 
-  // 주식 현재가 조회 (실시간)
-  async getCurrentPrice(stockCode) {
-    const cacheKey = `price-${stockCode}`;
+  // 주식 현재가 조회 (한국 + 해외 주식)
+  async getCurrentPrice(stockCode, market = 'auto') {
+    const detectedMarket = this.detectMarket(stockCode, market);
+    const cacheKey = `price-${stockCode}-${detectedMarket}`;
     const cached = this.getCachedData(cacheKey);
     if (cached) return cached;
 
     if (this.mockMode) {
-      return this.getMockStockData(stockCode);
+      return detectedMarket === 'overseas' ? 
+        this.getMockOverseasStockData(stockCode) : 
+        this.getMockStockData(stockCode);
     }
 
     if (!this.canMakeRequest()) {
@@ -264,6 +267,130 @@ class KISAPIService {
       currency: 'KRW',
       marketStatus: this.getMarketStatus(),
       source: this.mockMode ? 'MOCK' : 'KIS'
+    };
+  }
+
+  // 시장 자동 판별
+  detectMarket(stockCode, market) {
+    if (market && market !== 'auto') return market;
+    
+    // 6자리 숫자 = 한국 주식
+    if (/^\d{6}$/.test(stockCode)) return 'domestic';
+    
+    // 영문 심볼 = 해외 주식
+    if (/^[A-Z]{1,5}$/.test(stockCode)) return 'overseas';
+    
+    return 'domestic';
+  }
+
+  // 거래소 코드 반환
+  getExchangeCode(symbol) {
+    const exchangeMap = {
+      'UAVS': 'NYS',  // AgEagle Aerial Systems - NYSE American
+      'AAPL': 'NAS',  // Apple - NASDAQ
+      'TSLA': 'NAS',  // Tesla - NASDAQ
+      'NVDA': 'NAS',  // NVIDIA - NASDAQ
+      'MSFT': 'NAS',  // Microsoft - NASDAQ
+      'GOOGL': 'NAS', // Alphabet - NASDAQ
+      'META': 'NAS',  // Meta - NASDAQ
+      'AMZN': 'NAS',  // Amazon - NASDAQ
+      'BA': 'NYS',    // Boeing - NYSE
+      'JPM': 'NYS',   // JPMorgan - NYSE
+      'RTX': 'NYS',   // Raytheon - NYSE
+      'LMT': 'NYS',   // Lockheed Martin - NYSE
+    };
+    
+    return exchangeMap[symbol] || 'NAS';
+  }
+
+  // 해외 주식 Mock 데이터 (최신 2024년 데이터 기준)
+  getMockOverseasStockData(symbol) {
+    const overseasMockData = {
+      // 🎯 에이지이글에어리얼 시스템스 - 정확한 데이터
+      'UAVS': { 
+        name: 'AgEagle Aerial Systems Inc', 
+        basePrice: 2.45, 
+        currency: 'USD', 
+        exchange: 'NYSE American',
+        sector: 'Aerospace & Defense',
+        industry: 'Drone Technology'
+      },
+      
+      // 주요 미국 주식들 (2024년 최신 가격 기준)
+      'AAPL': { name: 'Apple Inc', basePrice: 195.50, currency: 'USD', exchange: 'NASDAQ' },
+      'TSLA': { name: 'Tesla Inc', basePrice: 248.50, currency: 'USD', exchange: 'NASDAQ' },
+      'NVDA': { name: 'NVIDIA Corp', basePrice: 875.30, currency: 'USD', exchange: 'NASDAQ' },
+      'MSFT': { name: 'Microsoft Corp', basePrice: 420.50, currency: 'USD', exchange: 'NASDAQ' },
+      'GOOGL': { name: 'Alphabet Inc', basePrice: 138.50, currency: 'USD', exchange: 'NASDAQ' },
+      'META': { name: 'Meta Platforms Inc', basePrice: 515.20, currency: 'USD', exchange: 'NASDAQ' },
+      'AMZN': { name: 'Amazon.com Inc', basePrice: 185.40, currency: 'USD', exchange: 'NASDAQ' },
+      
+      // 항공우주 & 방산 관련 (에이지이글과 유사 섹터)
+      'BA': { name: 'Boeing Co', basePrice: 178.90, currency: 'USD', exchange: 'NYSE' },
+      'RTX': { name: 'Raytheon Technologies Corp', basePrice: 115.25, currency: 'USD', exchange: 'NYSE' },
+      'LMT': { name: 'Lockheed Martin Corp', basePrice: 445.80, currency: 'USD', exchange: 'NYSE' },
+      'PLTR': { name: 'Palantir Technologies Inc', basePrice: 25.15, currency: 'USD', exchange: 'NYSE' },
+      
+      // 드론 & 항공 기술 관련
+      'AVAV': { name: 'AeroVironment Inc', basePrice: 102.35, currency: 'USD', exchange: 'NASDAQ' },
+      'KTOS': { name: 'Kratos Defense & Security Solutions', basePrice: 18.45, currency: 'USD', exchange: 'NASDAQ' }
+    };
+
+    const stock = overseasMockData[symbol] || { 
+      name: `${symbol} Corp`, 
+      basePrice: 50 + Math.random() * 100,
+      currency: 'USD',
+      exchange: 'NASDAQ',
+      sector: 'Technology',
+      industry: 'Software'
+    };
+
+    const changePercent = (Math.random() - 0.5) * 8; // 해외 주식 변동성
+    const change = stock.basePrice * changePercent / 100;
+    const currentPrice = stock.basePrice + change;
+
+    return {
+      symbol: symbol,
+      name: stock.name,
+      price: parseFloat(currentPrice.toFixed(2)),
+      change: parseFloat(change.toFixed(2)),
+      changePercent: parseFloat(changePercent.toFixed(2)),
+      volume: Math.floor(Math.random() * 10000000),
+      high: parseFloat((currentPrice + Math.random() * 5).toFixed(2)),
+      low: parseFloat((currentPrice - Math.random() * 5).toFixed(2)),
+      open: parseFloat((stock.basePrice + (Math.random() - 0.5) * 10).toFixed(2)),
+      market: stock.exchange,
+      timestamp: new Date().toISOString(),
+      currency: stock.currency,
+      exchangeCode: this.getExchangeCode(symbol),
+      marketStatus: this.getUSMarketStatus(),
+      source: this.mockMode ? 'MOCK_OVERSEAS' : 'KIS_OVERSEAS',
+      isOverseas: true,
+      sector: stock.sector,
+      industry: stock.industry,
+      // 에이지이글 특별 마킹
+      isAgEagle: symbol === 'UAVS'
+    };
+  }
+
+  // 미국 시장 상태 확인
+  getUSMarketStatus() {
+    const now = new Date();
+    const estTime = new Date(now.getTime() - 5 * 60 * 60 * 1000); // EST
+    const hour = estTime.getHours();
+    const day = estTime.getDay();
+
+    // 미국 증시: 평일 09:30-16:00 EST
+    const isOpen = (day >= 1 && day <= 5) && 
+                   ((hour === 9 && estTime.getMinutes() >= 30) || 
+                    (hour >= 10 && hour < 16));
+
+    return {
+      isOpen,
+      timezone: 'America/New_York',
+      openTime: '09:30 EST',
+      closeTime: '16:00 EST',
+      currentTime: estTime.toLocaleString('en-US')
     };
   }
 
