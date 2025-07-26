@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import AdvancedFrameworksPanel from './components/AdvancedFrameworksPanel';
 
 function App() {
   const [selectedStock, setSelectedStock] = useState('삼성전자');
@@ -107,20 +106,68 @@ function App() {
             margin: 0,
             fontWeight: '600'
           }}>
-            ✅ 30+ 고급 트레이딩 프레임워크 준비 완료!
+            ✅ 기본 화면 로딩 테스트 중...
           </p>
         </div>
       </div>
       
-      {/* 30+ 고급 프레임워크 패널 */}
+      {/* 테스트 메시지 */}
       <div style={{
         maxWidth: '1200px',
-        margin: '0 auto'
+        margin: '0 auto',
+        backgroundColor: darkMode ? '#2d2d2d' : 'white',
+        padding: '30px',
+        borderRadius: '10px',
+        boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
+        textAlign: 'center'
       }}>
-        <AdvancedFrameworksPanel 
-          selectedStock={selectedStock}
-          darkMode={darkMode}
-        />
+        <h3 style={{ 
+          color: darkMode ? '#fff' : '#333',
+          marginBottom: '20px'
+        }}>
+          🧪 하얀 화면 문제 해결 중
+        </h3>
+        <p style={{ 
+          color: darkMode ? '#ccc' : '#666',
+          fontSize: '16px',
+          lineHeight: '1.6'
+        }}>
+          현재 선택된 종목: <strong style={{ color: darkMode ? '#4ecdc4' : '#8884d8' }}>{selectedStock}</strong><br/>
+          다크 모드: <strong style={{ color: darkMode ? '#4ecdc4' : '#8884d8' }}>{darkMode ? '활성화' : '비활성화'}</strong><br/>
+          <br/>
+          이 화면이 보인다면 기본 React 앱은 정상 작동합니다.<br/>
+          다음 단계에서 30+ 고급 프레임워크를 점진적으로 추가하겠습니다.
+        </p>
+        
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+          gap: '15px',
+          marginTop: '30px'
+        }}>
+          {['거시탐구', '바텀업', '심리밈테마', '인과상관', '투자전략'].map((category, index) => (
+            <div key={category} style={{
+              padding: '20px',
+              backgroundColor: darkMode ? '#3d3d3d' : '#f8f9fa',
+              borderRadius: '8px',
+              border: `2px solid ${darkMode ? '#555' : '#eee'}`
+            }}>
+              <h4 style={{ 
+                color: darkMode ? '#fff' : '#333',
+                margin: '0 0 10px 0'
+              }}>
+                📊 {category} 프레임
+              </h4>
+              <p style={{ 
+                color: darkMode ? '#ccc' : '#666',
+                margin: 0,
+                fontSize: '14px'
+              }}>
+                {index + 1}단계 로딩 예정
+              </p>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
