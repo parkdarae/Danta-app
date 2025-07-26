@@ -29,6 +29,12 @@ const CategoryNavigation = ({ currentCategory, onCategoryChange, darkMode = fals
       icon: '💰'
     },
     {
+      id: 'psychology',
+      name: '🧠 감정 & 메타인지',
+      description: '감정기록, 메타인지분석, 투자심리',
+      icon: '🎭'
+    },
+    {
       id: 'tools',
       name: '🛠️ 도구',
       description: '데이터관리, 설정, 튜토리얼',

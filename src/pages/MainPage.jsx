@@ -29,6 +29,8 @@ import PortfolioOCR from '../components/PortfolioOCR';
 import EnhancedNewsAnalyzer from '../components/EnhancedNewsAnalyzer';
 import EnhancedStockSearch from '../components/EnhancedStockSearch';
 import StockAlertSystem from '../components/StockAlertSystem';
+import EmotionalTradingTracker from '../components/EmotionalTradingTracker';
+import MetaCognitionReport from '../components/MetaCognitionReport';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { STORAGE_KEYS, STOCKS } from '../utils/constants';
 
@@ -210,6 +212,22 @@ function MainPage() {
           </>
         );
       
+      case 'psychology':
+        return (
+          <>
+            <TutorialHelper darkMode={darkMode} />
+            <EmotionalTradingTracker 
+              darkMode={darkMode} 
+              selectedStock={selectedStock}
+            />
+            <MetaCognitionReport darkMode={darkMode} />
+            <CharacterReaction emotion={emotion} darkMode={darkMode} />
+            <EmotionButtons onSelect={handleEmotion} darkMode={darkMode} />
+            <AIProfileReport darkMode={darkMode} />
+            <PsyScoreSection darkMode={darkMode} />
+          </>
+        );
+      
       case 'tools':
         return (
           <>
@@ -326,6 +344,7 @@ function MainPage() {
               case 'analysis': return '🔍 분석 도구';
               case 'news': return '📰 뉴스 정보';
               case 'portfolio': return '💼 포트폴리오';
+              case 'psychology': return '🧠 감정 & 메타인지';
               case 'tools': return '🛠️ 관리 도구';
               default: return '카테고리 선택';
             }
