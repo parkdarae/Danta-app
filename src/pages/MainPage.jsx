@@ -53,6 +53,11 @@ function MainPage() {
   const [userPortfolio, setUserPortfolio] = useState([]);
   const [isFirstVisit, setIsFirstVisit] = useLocalStorage('is_first_visit', true);
   const [showOnboarding, setShowOnboarding] = useState(false);
+  
+  // isFirstVisit이 변경될 때 showOnboarding도 연동
+  useEffect(() => {
+    setShowOnboarding(isFirstVisit);
+  }, [isFirstVisit]);
   const [generatedKeywords, setGeneratedKeywords] = useState([]);
   
   const notification = useChaessaemNotification();
@@ -61,21 +66,26 @@ function MainPage() {
     setDarkMode(dm => !dm);
   }, [setDarkMode]);
 
-  // 첫 방문 시 웰컴 메시지
+  // 첫 방문 시 웰컴 메시지 (한 번만 실행)
   useEffect(() => {
     if (isFirstVisit) {
-      setTimeout(() => {
+      const timer = setTimeout(() => {
         notification.success(
           '채쌤과 함께하는 스마트 투자 여정에 오신 것을 환영합니다! 🎉',
           {
             title: '환영합니다!',
-            duration: 8000,
-            position: 'center'
+            position: 'center',
+            duration: 5000
           }
         );
+        
+        // 환영 메시지 표시 후 첫 방문 상태 즉시 해제
+        setIsFirstVisit(false);
       }, 2000);
+      
+      return () => clearTimeout(timer);
     }
-  }, [isFirstVisit, notification]);
+  }, []); // 빈 의존성 배열로 마운트 시에만 실행
 
   // 관심종목 변경 콜백
   const handleWatchlistChange = useCallback((newWatchlist) => {
@@ -460,15 +470,15 @@ function MainPage() {
       />
       
       {/* 인터랙티브 가이드 */}
-      <InteractiveGuide
-        darkMode={darkMode}
-        currentSection={currentCategory}
-        showOnboarding={isFirstVisit}
-        onComplete={() => {
-          setIsFirstVisit(false);
-          setShowOnboarding(false);
-        }}
-      />
+              <InteractiveGuide
+          darkMode={darkMode}
+          currentSection={currentCategory}
+          showOnboarding={showOnboarding}
+          onComplete={() => {
+            setShowOnboarding(false);
+            // isFirstVisit는 이미 환영 메시지에서 false로 설정됨
+          }}
+        />
       
       {/* 채쌤 알림 시스템 */}
       <ChaessaemNotificationContainer
