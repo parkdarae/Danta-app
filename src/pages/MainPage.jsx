@@ -41,9 +41,10 @@ import { useTypography } from '../hooks/useTypography';
 import { STORAGE_KEYS, STOCKS } from '../utils/constants';
 
 function MainPage() {
-  const [emotion, setEmotion] = useState('neutral');
-  const [selectedStock, setSelectedStock] = useLocalStorage(STORAGE_KEYS.SELECTED_STOCK, STOCKS[1]);
-  const [chartType, setChartType] = useLocalStorage(STORAGE_KEYS.CHART_TYPE, '5min');
+  // State 관리 (누락된 miningResults 추가)
+  const [selectedStock, setSelectedStock] = useState('');
+  const [emotion, setEmotion] = useState('');
+  const [chartType, setChartType] = useState('line');
   const [history, setHistory] = useState([]);
   const [darkMode, setDarkMode] = useLocalStorage(STORAGE_KEYS.DARK_MODE, false);
   const [miningResults, setMiningResults] = useState(null);
@@ -54,7 +55,6 @@ function MainPage() {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [generatedKeywords, setGeneratedKeywords] = useState([]);
   
-  const typography = useTypography(darkMode);
   const notification = useChaessaemNotification();
 
   const toggleDarkMode = useCallback(() => {
@@ -328,7 +328,7 @@ function MainPage() {
     const emotionMessages = {
       excited: '와! 흥미진진한 투자 타이밍이네요! 하지만 너무 성급하지 마세요 😊',
       happy: '좋은 기분이네요! 수익이 날 때일수록 차분함을 유지하세요 ✨',
-      confident: '자신감이 넘치시네요! 과신은 금물, 항상 리스크 관리를 잊지 마세요 💪',
+      confident: '자신감이 넘치시네요! 과신은 금물, 항상 리스크 관리를 잊지 마세요 ��',
       worried: '걱정되시는군요. 이럴 때일수록 차분히 데이터를 분석해보세요 🤔',
       surprised: '놀라운 상황이군요! 예상치 못한 변동성에 대비하세요 😲',
       greed: '수익에 대한 욕심이 생기셨나요? 적절한 수익실현도 중요해요 💰',

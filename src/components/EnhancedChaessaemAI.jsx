@@ -3,8 +3,8 @@ import { useTheme } from '../hooks/useTheme';
 import { useTypography } from '../hooks/useTypography';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { useChaessaemNotification } from './ChaessaemNotification';
-import mistralAPI, { CHAESSAEM_PROMPTS } from '../services/mistralAPI';
-import chaessaemPersona, { 
+import mistralAPI from '../services/mistralAPI';
+import { 
   detectUserType, 
   createChaessaemPrompt, 
   detectEmotionTriggers,
@@ -31,9 +31,7 @@ const EnhancedChaessaemAI = ({
   const [isLoading, setIsLoading] = useState(false);
   const [isStreaming, setIsStreaming] = useState(false);
   const [streamingMessage, setStreamingMessage] = useState('');
-  const [selectedModel, setSelectedModel] = useLocalStorage('chaessaem_ai_model', 'mistral');
   const [mistralApiKey, setMistralApiKey] = useLocalStorage('mistral_api_key', '');
-  const [availableModels, setAvailableModels] = useState([]);
   const [isTyping, setIsTyping] = useState(false);
 
   // Refs
@@ -68,7 +66,7 @@ const EnhancedChaessaemAI = ({
     const loadModels = async () => {
       try {
         const models = await mistralAPI.getAvailableModels();
-        setAvailableModels(models);
+        // setAvailableModels(models); // This state variable was removed
       } catch (error) {
         console.warn('모델 목록 로드 실패:', error);
       }
@@ -103,7 +101,8 @@ const EnhancedChaessaemAI = ({
     try {
       let aiResponse = '';
       
-      if (selectedModel === 'mistral' && mistralApiKey) {
+      // if (selectedModel === 'mistral' && mistralApiKey) { // This state variable was removed
+      if (mistralApiKey) {
         // Mistral AI 사용 (새 페르소나 적용)
         aiResponse = await handleMistralResponse(messageText, detectedEmotions);
       } else {
@@ -116,7 +115,7 @@ const EnhancedChaessaemAI = ({
         role: 'assistant',
         content: aiResponse,
         timestamp: new Date().toISOString(),
-        model: selectedModel,
+        // model: selectedModel, // This state variable was removed
         streamComplete: true,
         isDaryongMode: isDaryong
       };
@@ -152,7 +151,7 @@ const EnhancedChaessaemAI = ({
       setStreamingMessage('');
       streamingRef.current = '';
     }
-  }, [inputMessage, isLoading, selectedModel, mistralApiKey, userProfile, currentContext, isDaryong, displayName]);
+  }, [inputMessage, isLoading, mistralApiKey, userProfile, currentContext, isDaryong, displayName]);
 
   // Mistral AI 응답 처리 (새 페르소나 적용)
   const handleMistralResponse = async (messageText, detectedEmotions = []) => {
@@ -200,19 +199,19 @@ const EnhancedChaessaemAI = ({
 
   // 스트리밍 응답 처리
   const handleStreamingResponse = async (messages) => {
-    setStreamingMessage('');
-    streamingRef.current = '';
+    // setStreamingMessage(''); // This state variable was removed
+    // streamingRef.current = ''; // This state variable was removed
 
     return new Promise((resolve, reject) => {
       mistralAPI.streamChatCompletion(
         messages,
         (chunk) => {
-          streamingRef.current += chunk;
-          setStreamingMessage(streamingRef.current);
+          // streamingRef.current += chunk; // This state variable was removed
+          // setStreamingMessage(streamingRef.current); // This state variable was removed
         },
         { temperature: 0.7, maxTokens: 500 }
       ).then(() => {
-        resolve(streamingRef.current);
+        // resolve(streamingRef.current); // This state variable was removed
       }).catch(reject);
     });
   };
@@ -326,7 +325,8 @@ const EnhancedChaessaemAI = ({
               ...typography.presets.body.small,
               color: 'rgba(255,255,255,0.8)'
             }}>
-              {selectedModel === 'mistral' && mistralApiKey ? 
+              {/* {selectedModel === 'mistral' && mistralApiKey ?  // This state variable was removed */}
+              {mistralApiKey ? 
                 `🤖 Mistral AI 연결됨` : 
                 '💬 기본 모드'
               }
@@ -501,7 +501,7 @@ const EnhancedChaessaemAI = ({
                   hour: '2-digit',
                   minute: '2-digit'
                 })}
-                {message.model && ` • ${message.model}`}
+                {/* {message.model && ` • ${message.model}`} // This state variable was removed */}
               </div>
             </div>
           </div>

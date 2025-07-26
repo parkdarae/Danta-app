@@ -1,5 +1,4 @@
 // 채쌤 3.0 - 다룡이 전용 AI 멘토 페르소나 시스템
-import { useLocalStorage } from '../hooks/useLocalStorage';
 
 // 채쌤 기본 정보
 export const CHAESSAEM_PROFILE = {

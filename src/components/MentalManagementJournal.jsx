@@ -3,7 +3,7 @@ import { useTheme } from '../hooks/useTheme';
 import { useTypography } from '../hooks/useTypography';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { useChaessaemNotification } from './ChaessaemNotification';
-import { detectUserType, createGolfStockAdvice, getTimeBasedGreeting } from '../services/chaessaemPersona';
+import { detectUserType, createGolfStockAdvice } from '../services/chaessaemPersona';
 import ChaessaemEmoji from './ChaessaemEmoji';
 import EnhancedButton from './EnhancedButton';
 
@@ -50,7 +50,7 @@ const MentalManagementJournal = ({ darkMode = false }) => {
   const userInfo = detectUserType();
   const isDaryong = userInfo.userType === 'CORE_USER';
 
-  // 상태 관리
+  // 상태 관리 (사용하지 않는 변수 제거)
   const [journalEntries, setJournalEntries] = useLocalStorage('mental_journal_entries', []);
   const [currentEntry, setCurrentEntry] = useState({
     date: new Date().toISOString().split('T')[0],
@@ -65,12 +65,10 @@ const MentalManagementJournal = ({ darkMode = false }) => {
     chaessaemAdvice: ''
   });
   const [activeTab, setActiveTab] = useState('daily');
-  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
-  const [showAnalytics, setShowAnalytics] = useState(false);
 
-  // 오늘의 채쌤 조언 생성
+  // 오늘의 채쌤 조언 생성 (의존성 수정)
   useEffect(() => {
-    if (!currentEntry.chaessaemAdvice) {
+    if (!currentEntry.chaessaemAdvice && (currentEntry.golfEmotion || currentEntry.tradingEmotion)) {
       const advice = createGolfStockAdvice({ 
         context: '멘탈 매니지먼트 일지',
         golfEmotion: currentEntry.golfEmotion,
@@ -78,7 +76,7 @@ const MentalManagementJournal = ({ darkMode = false }) => {
       });
       setCurrentEntry(prev => ({ ...prev, chaessaemAdvice: advice }));
     }
-  }, [currentEntry.golfEmotion, currentEntry.tradingEmotion]);
+  }, [currentEntry.golfEmotion, currentEntry.tradingEmotion, currentEntry.chaessaemAdvice]);
 
   // 루틴 체크 핸들러
   const handleRoutineCheck = (category, routineId, checked) => {
