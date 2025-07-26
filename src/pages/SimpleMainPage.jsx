@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import TodayIssueStocks from '../components/TodayIssueStocks';
-import KakaoStyleNotifications from '../components/KakaoStyleNotifications';
-import KeywordStockDiscovery from '../components/KeywordStockDiscovery';
-import EmotionalTradingJournal from '../components/EmotionalTradingJournal';
+// import KakaoStyleNotifications from '../components/KakaoStyleNotifications';
+// import KeywordStockDiscovery from '../components/KeywordStockDiscovery';
+// import EmotionalTradingJournal from '../components/EmotionalTradingJournal';
 import ChaessaemCharacter from '../components/ChaessaemCharacter';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 
@@ -13,25 +13,25 @@ function SimpleMainPage() {
   const sections = [
     { key: 'dashboard', label: '🏠 대시보드', icon: '🏠' },
     { key: 'issues', label: '🔥 이슈종목', icon: '🔥' },
-    { key: 'discovery', label: '🧠 종목발굴', icon: '🧠' },
-    { key: 'journal', label: '💭 감정기록', icon: '💭' },
-    { key: 'alerts', label: '📱 실시간알람', icon: '📱' }
+    // { key: 'discovery', label: '🧠 종목발굴', icon: '🧠' },
+    // { key: 'journal', label: '💭 감정기록', icon: '💭' },
+    // { key: 'alerts', label: '📱 실시간알람', icon: '📱' }
   ];
 
   const renderCurrentSection = () => {
     switch (currentSection) {
       case 'issues':
         return <TodayIssueStocks darkMode={darkMode} />;
-      case 'discovery':
-        return <KeywordStockDiscovery darkMode={darkMode} />;
-      case 'journal':
-        return <EmotionalTradingJournal darkMode={darkMode} />;
-      case 'alerts':
-        return <KakaoStyleNotifications darkMode={darkMode} />;
+      // case 'discovery':
+      //   return <KeywordStockDiscovery darkMode={darkMode} />;
+      // case 'journal':
+      //   return <EmotionalTradingJournal darkMode={darkMode} />;
+      // case 'alerts':
+      //   return <KakaoStyleNotifications darkMode={darkMode} />;
       default:
         return (
           <div>
-            {/* 대시보드 - 모든 컴포넌트 요약 */}
+            {/* 대시보드 - 기본 버전 */}
             <div style={{
               display: 'grid',
               gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
@@ -94,172 +94,34 @@ function SimpleMainPage() {
                 </div>
               </div>
 
-              {/* 종목 발굴 미리보기 */}
+              {/* 새 기능 준비중 안내 */}
               <div style={{
                 background: darkMode ? '#2d2d2d' : '#ffffff',
                 borderRadius: '16px',
                 padding: '20px',
-                border: `2px solid ${darkMode ? '#2ECC71' : '#27ae60'}`,
-                cursor: 'pointer',
-                transition: 'all 0.3s ease'
-              }}
-              onClick={() => setCurrentSection('discovery')}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'translateY(-4px)';
-                e.currentTarget.style.boxShadow = '0 8px 25px rgba(0,0,0,0.15)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = 'none';
+                border: `2px solid ${darkMode ? '#FFA500' : '#f39c12'}`,
+                textAlign: 'center'
               }}>
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '12px',
-                  marginBottom: '16px'
+                <div style={{ fontSize: '48px', marginBottom: '16px' }}>🚧</div>
+                <h3 style={{
+                  color: darkMode ? '#ffffff' : '#333333',
+                  margin: '0 0 12px 0',
+                  fontSize: '18px',
+                  fontWeight: '700'
                 }}>
-                  <span style={{ fontSize: '24px' }}>🧠</span>
-                  <h3 style={{
-                    color: darkMode ? '#ffffff' : '#333333',
-                    margin: 0,
-                    fontSize: '18px',
-                    fontWeight: '700'
-                  }}>
-                    키워드 종목 발굴
-                  </h3>
-                </div>
+                  새로운 기능 준비중
+                </h3>
                 <p style={{
                   color: darkMode ? '#cccccc' : '#666666',
                   margin: 0,
                   lineHeight: 1.5,
                   fontSize: '14px'
                 }}>
-                  브레인스토밍으로 키워드를 생성하고, AI 추천을 통해 
-                  숨겨진 보석 종목을 발굴해보세요.
+                  🤖 AI 채쌤 종목 발굴<br/>
+                  💭 감정 기반 트레이딩 기록<br/>
+                  📱 실시간 카톡 알람<br/><br/>
+                  더 안정적인 버전으로 곧 업데이트 예정입니다!
                 </p>
-                <div style={{
-                  marginTop: '12px',
-                  padding: '8px 12px',
-                  background: `${darkMode ? '#2ECC71' : '#27ae60'}20`,
-                  borderRadius: '8px',
-                  fontSize: '12px',
-                  color: darkMode ? '#2ECC71' : '#27ae60',
-                  fontWeight: '600'
-                }}>
-                  발굴 시작하기 →
-                </div>
-              </div>
-
-              {/* 감정 기록 미리보기 */}
-              <div style={{
-                background: darkMode ? '#2d2d2d' : '#ffffff',
-                borderRadius: '16px',
-                padding: '20px',
-                border: `2px solid ${darkMode ? '#E74C3C' : '#e74c3c'}`,
-                cursor: 'pointer',
-                transition: 'all 0.3s ease'
-              }}
-              onClick={() => setCurrentSection('journal')}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'translateY(-4px)';
-                e.currentTarget.style.boxShadow = '0 8px 25px rgba(0,0,0,0.15)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = 'none';
-              }}>
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '12px',
-                  marginBottom: '16px'
-                }}>
-                  <span style={{ fontSize: '24px' }}>💭</span>
-                  <h3 style={{
-                    color: darkMode ? '#ffffff' : '#333333',
-                    margin: 0,
-                    fontSize: '18px',
-                    fontWeight: '700'
-                  }}>
-                    감정 기반 트레이딩 기록
-                  </h3>
-                </div>
-                <p style={{
-                  color: darkMode ? '#cccccc' : '#666666',
-                  margin: 0,
-                  lineHeight: 1.5,
-                  fontSize: '14px'
-                }}>
-                  투자 감정과 메타인지를 기록하여 더 나은 투자 의사결정을 
-                  할 수 있도록 도와드려요.
-                </p>
-                <div style={{
-                  marginTop: '12px',
-                  padding: '8px 12px',
-                  background: `${darkMode ? '#E74C3C' : '#e74c3c'}20`,
-                  borderRadius: '8px',
-                  fontSize: '12px',
-                  color: darkMode ? '#E74C3C' : '#e74c3c',
-                  fontWeight: '600'
-                }}>
-                  기록 시작하기 →
-                </div>
-              </div>
-
-              {/* 실시간 알람 미리보기 */}
-              <div style={{
-                background: darkMode ? '#2d2d2d' : '#ffffff',
-                borderRadius: '16px',
-                padding: '20px',
-                border: `2px solid ${darkMode ? '#F39C12' : '#f39c12'}`,
-                cursor: 'pointer',
-                transition: 'all 0.3s ease'
-              }}
-              onClick={() => setCurrentSection('alerts')}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'translateY(-4px)';
-                e.currentTarget.style.boxShadow = '0 8px 25px rgba(0,0,0,0.15)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = 'none';
-              }}>
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '12px',
-                  marginBottom: '16px'
-                }}>
-                  <span style={{ fontSize: '24px' }}>📱</span>
-                  <h3 style={{
-                    color: darkMode ? '#ffffff' : '#333333',
-                    margin: 0,
-                    fontSize: '18px',
-                    fontWeight: '700'
-                  }}>
-                    실시간 카톡 알람
-                  </h3>
-                </div>
-                <p style={{
-                  color: darkMode ? '#cccccc' : '#666666',
-                  margin: 0,
-                  lineHeight: 1.5,
-                  fontSize: '14px'
-                }}>
-                  가격, 손절, 뉴스, 변동성, 채쌤 팁 등 다양한 알림을 
-                  카카오톡 스타일로 받아보세요.
-                </p>
-                <div style={{
-                  marginTop: '12px',
-                  padding: '8px 12px',
-                  background: `${darkMode ? '#F39C12' : '#f39c12'}20`,
-                  borderRadius: '8px',
-                  fontSize: '12px',
-                  color: darkMode ? '#F39C12' : '#f39c12',
-                  fontWeight: '600'
-                }}>
-                  알림 설정하기 →
-                </div>
               </div>
             </div>
 
@@ -289,124 +151,10 @@ function SimpleMainPage() {
                 marginLeft: 'auto',
                 marginRight: 'auto'
               }}>
-                LPGA 투어 10승을 기록한 골프 프로이자, 투자 심리 전문 코치입니다.<br/>
-                여러분의 투자 여정에서 감정을 관리하고 더 나은 의사결정을 할 수 있도록 도와드릴게요.<br/>
-                <strong>특히 다룡이의 전용 AI 멘토</strong>로서 언제나 함께하겠습니다! 💖
+                현재 새로운 AI 기능들을 안정화하고 있어요!<br/>
+                당분간은 <strong>이슈 종목 분석</strong> 기능을 사용해주세요.<br/>
+                더 좋은 모습으로 곧 다시 만나뵐게요! 💖
               </p>
-              
-              <div style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-                gap: '16px',
-                marginTop: '24px',
-                maxWidth: '800px',
-                marginLeft: 'auto',
-                marginRight: 'auto'
-              }}>
-                <div style={{
-                  background: darkMode ? '#2d2d2d' : '#ffffff',
-                  borderRadius: '12px',
-                  padding: '16px',
-                  border: `1px solid ${darkMode ? '#4A90E2' : '#667eea'}20`
-                }}>
-                  <div style={{ fontSize: '20px', marginBottom: '8px' }}>🧠</div>
-                  <h4 style={{
-                    color: darkMode ? '#ffffff' : '#333333',
-                    margin: '0 0 8px 0',
-                    fontSize: '14px',
-                    fontWeight: '600'
-                  }}>
-                    투자 심리 관리
-                  </h4>
-                  <p style={{
-                    color: darkMode ? '#cccccc' : '#666666',
-                    margin: 0,
-                    fontSize: '12px',
-                    lineHeight: 1.4
-                  }}>
-                    FOMO, 탐욕, 두려움 등<br/>
-                    투자 감정을 과학적으로 분석
-                  </p>
-                </div>
-                
-                <div style={{
-                  background: darkMode ? '#2d2d2d' : '#ffffff',
-                  borderRadius: '12px',
-                  padding: '16px',
-                  border: `1px solid ${darkMode ? '#2ECC71' : '#27ae60'}20`
-                }}>
-                  <div style={{ fontSize: '20px', marginBottom: '8px' }}>🎯</div>
-                  <h4 style={{
-                    color: darkMode ? '#ffffff' : '#333333',
-                    margin: '0 0 8px 0',
-                    fontSize: '14px',
-                    fontWeight: '600'
-                  }}>
-                    종목 발굴 전문가
-                  </h4>
-                  <p style={{
-                    color: darkMode ? '#cccccc' : '#666666',
-                    margin: 0,
-                    fontSize: '12px',
-                    lineHeight: 1.4
-                  }}>
-                    키워드 브레인스토밍으로<br/>
-                    숨겨진 보석 종목 발굴
-                  </p>
-                </div>
-                
-                <div style={{
-                  background: darkMode ? '#2d2d2d' : '#ffffff',
-                  borderRadius: '12px',
-                  padding: '16px',
-                  border: `1px solid ${darkMode ? '#E74C3C' : '#e74c3c'}20`
-                }}>
-                  <div style={{ fontSize: '20px', marginBottom: '8px' }}>📱</div>
-                  <h4 style={{
-                    color: darkMode ? '#ffffff' : '#333333',
-                    margin: '0 0 8px 0',
-                    fontSize: '14px',
-                    fontWeight: '600'
-                  }}>
-                    실시간 알림
-                  </h4>
-                  <p style={{
-                    color: darkMode ? '#cccccc' : '#666666',
-                    margin: 0,
-                    fontSize: '12px',
-                    lineHeight: 1.4
-                  }}>
-                    중요한 시장 변화와<br/>
-                    투자 타이밍을 놓치지 않게
-                  </p>
-                </div>
-                
-                <div style={{
-                  background: darkMode ? '#2d2d2d' : '#ffffff',
-                  borderRadius: '12px',
-                  padding: '16px',
-                  border: `1px solid ${darkMode ? '#9B59B6' : '#9b59b6'}20`
-                }}>
-                  <div style={{ fontSize: '20px', marginBottom: '8px' }}>🏌️‍♀️</div>
-                  <h4 style={{
-                    color: darkMode ? '#ffffff' : '#333333',
-                    margin: '0 0 8px 0',
-                    fontSize: '14px',
-                    fontWeight: '600'
-                  }}>
-                  멘탈 코칭
-                  </h4>
-                  <p style={{
-                    color: darkMode ? '#cccccc' : '#666666',
-                    margin: 0,
-                    fontSize: '12px',
-                    lineHeight: 1.4
-                  }}>
-                    골프와 투자 모두에서<br/>
-                    강인한 멘탈 관리법 전수
-                  </p>
-                </div>
-              </div>
             </div>
           </div>
         );
