@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import AdvancedFrameworksPanel from './components/AdvancedFrameworksPanel';
 
 function App() {
   const [selectedStock, setSelectedStock] = useState('삼성전자');
@@ -159,22 +158,131 @@ function App() {
             justifyContent: 'center',
             gap: '10px'
           }}>
-            <span style={{ fontSize: '1.5rem' }}>🚀</span>
-            30+ 고급 트레이딩 프레임워크 실행 준비 완료!
-            <span style={{ fontSize: '1.5rem' }}>✨</span>
+            <span style={{ fontSize: '1.5rem' }}>🔧</span>
+            30+ 고급 프레임워크 복구 중... 잠시만 기다려주세요!
+            <span style={{ fontSize: '1.5rem' }}>⚡</span>
           </p>
         </div>
       </div>
       
-      {/* 30+ 고급 프레임워크 패널 - 복구! */}
+      {/* 예쁜 프레임워크 미리보기 */}
       <div style={{
         maxWidth: '1400px',
-        margin: '0 auto'
+        margin: '0 auto',
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))',
+        gap: '25px',
+        padding: '20px 0'
       }}>
-        <AdvancedFrameworksPanel 
-          selectedStock={selectedStock}
-          darkMode={darkMode}
-        />
+        {[
+          { name: '거시탐구 프레임', icon: '🏛️', desc: '정책 수혜 스코어링, 글로벌 리스크 매핑', count: '5개' },
+          { name: '바텀업 분석 프레임', icon: '🔬', desc: 'R&D 투자비율, 재무 건전성 분석', count: '5개' },
+          { name: '심리/밈/테마 프레임', icon: '🧠', desc: '레딧 열기 지수, FOMO 경계지수', count: '5개' },
+          { name: '인과관계 분석 프레임', icon: '🔗', desc: '정책↔산업↔종목 그래프, 동반상승', count: '4개' },
+          { name: '투자 전략 프레임', icon: '💰', desc: '퀀트팩터 랭킹, 수익 최대화', count: '5개' }
+        ].map((framework, index) => (
+          <div key={framework.name} style={{
+            background: darkMode 
+              ? 'linear-gradient(135deg, #2d2d2d, #3d3d3d)' 
+              : 'linear-gradient(135deg, #fff, #f8f9fa)',
+            padding: '30px',
+            borderRadius: '20px',
+            border: `2px solid ${darkMode ? '#555' : '#e0e0e0'}`,
+            boxShadow: darkMode 
+              ? '0 10px 30px rgba(0,0,0,0.3)' 
+              : '0 10px 30px rgba(0,0,0,0.1)',
+            textAlign: 'center',
+            position: 'relative',
+            overflow: 'hidden',
+            transition: 'all 0.3s ease',
+            cursor: 'pointer'
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = 'translateY(-5px)';
+            e.currentTarget.style.boxShadow = darkMode 
+              ? '0 15px 40px rgba(0,0,0,0.4)' 
+              : '0 15px 40px rgba(0,0,0,0.15)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = 'translateY(0)';
+            e.currentTarget.style.boxShadow = darkMode 
+              ? '0 10px 30px rgba(0,0,0,0.3)' 
+              : '0 10px 30px rgba(0,0,0,0.1)';
+          }}
+          >
+            {/* 프레임 번호 배지 */}
+            <div style={{
+              position: 'absolute',
+              top: '15px',
+              right: '15px',
+              background: 'linear-gradient(45deg, #8884d8, #ff6b6b)',
+              color: 'white',
+              borderRadius: '50%',
+              width: '30px',
+              height: '30px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '14px',
+              fontWeight: '700'
+            }}>
+              {index + 1}
+            </div>
+            
+            <div style={{ fontSize: '3rem', marginBottom: '15px' }}>
+              {framework.icon}
+            </div>
+            
+            <h3 style={{
+              color: darkMode ? '#fff' : '#333',
+              margin: '0 0 10px 0',
+              fontSize: '1.3rem',
+              fontWeight: '700'
+            }}>
+              {framework.name}
+            </h3>
+            
+            <div style={{
+              background: darkMode ? '#4ecdc4' : '#8884d8',
+              color: 'white',
+              padding: '5px 12px',
+              borderRadius: '20px',
+              fontSize: '12px',
+              fontWeight: '600',
+              display: 'inline-block',
+              marginBottom: '15px'
+            }}>
+              {framework.count}
+            </div>
+            
+            <p style={{
+              color: darkMode ? '#ccc' : '#666',
+              margin: 0,
+              fontSize: '14px',
+              lineHeight: '1.5'
+            }}>
+              {framework.desc}
+            </p>
+            
+            {/* 로딩 바 */}
+            <div style={{
+              marginTop: '20px',
+              background: darkMode ? '#555' : '#eee',
+              borderRadius: '10px',
+              height: '8px',
+              overflow: 'hidden'
+            }}>
+              <div style={{
+                width: `${(index + 1) * 20}%`,
+                height: '100%',
+                background: 'linear-gradient(45deg, #8884d8, #4ecdc4)',
+                borderRadius: '10px',
+                transition: 'width 2s ease',
+                animation: 'loading 2s ease-in-out infinite alternate'
+              }} />
+            </div>
+          </div>
+        ))}
       </div>
 
       {/* CSS 애니메이션 */}
@@ -184,6 +292,11 @@ function App() {
             0% { background-position: 0% 50%; }
             50% { background-position: 100% 50%; }
             100% { background-position: 0% 50%; }
+          }
+          
+          @keyframes loading {
+            0% { opacity: 0.7; }
+            100% { opacity: 1; }
           }
           
           select:hover {
