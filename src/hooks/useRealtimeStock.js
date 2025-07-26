@@ -1,5 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import realtimeAPI from '../services/realtimeAPI';
+import kisAPI from '../services/kisAPI';
+import freeUSStockAPI from '../services/freeUSStockAPI';
 
 export const useRealtimeStock = (symbol, options = {}) => {
   const [data, setData] = useState(null);
@@ -24,7 +26,23 @@ export const useRealtimeStock = (symbol, options = {}) => {
     setError(null);
 
     try {
-      const stockData = await realtimeAPI.getStockData(symbol, market);
+      // 한국 주식 코드 판별 (6자리 숫자)
+      const isKoreanStock = /^\d{6}$/.test(symbol);
+      
+      let stockData;
+      if (isKoreanStock || market === 'korean') {
+        // KIS API 사용 (한국 주식)
+        stockData = await kisAPI.getCurrentPrice(symbol);
+      } else {
+        // 미국 주식 - 무료 API 우선 사용
+        try {
+          stockData = await freeUSStockAPI.getUSStockData(symbol);
+        } catch (error) {
+          console.warn('무료 US API 실패, 기존 API로 시도:', error);
+          stockData = await realtimeAPI.getStockData(symbol, market);
+        }
+      }
+      
       setData(stockData);
       retryCountRef.current = 0; // 성공시 재시도 카운트 리셋
     } catch (err) {
@@ -48,25 +66,67 @@ export const useRealtimeStock = (symbol, options = {}) => {
     if (!symbol || subscriptionRef.current) return;
 
     setIsRealTime(true);
-    subscriptionRef.current = realtimeAPI.startRealTimeSubscription(
-      symbol,
-      (stockData, error) => {
-        if (error) {
-          setError(error.message);
-        } else {
-          setData(stockData);
-          setError(null);
-        }
-        setLoading(false);
-      },
-      interval
-    );
-  }, [symbol, interval]);
+    
+    // 한국 주식인지 판별
+    const isKoreanStock = /^\d{6}$/.test(symbol);
+    
+    if (isKoreanStock || market === 'korean') {
+      // KIS API 실시간 구독 (한국 주식)
+      subscriptionRef.current = kisAPI.startRealTimeSubscription(
+        symbol,
+        (stockData, error) => {
+          if (error) {
+            setError(error.message);
+          } else {
+            setData(stockData);
+            setError(null);
+          }
+          setLoading(false);
+        },
+        interval
+      );
+    } else {
+      // 무료 미국 주식 API 실시간 구독
+      subscriptionRef.current = freeUSStockAPI.startRealTimeSubscription(
+        symbol,
+        (stockData, error) => {
+          if (error) {
+            setError(error.message);
+            // 실패 시 기존 API로 폴백
+            subscriptionRef.current = realtimeAPI.startRealTimeSubscription(
+              symbol,
+              (stockData, error) => {
+                if (error) {
+                  setError(error.message);
+                } else {
+                  setData(stockData);
+                  setError(null);
+                }
+                setLoading(false);
+              },
+              interval
+            );
+          } else {
+            setData(stockData);
+            setError(null);
+          }
+          setLoading(false);
+        },
+        interval
+      );
+    }
+  }, [symbol, interval, market]);
 
   // 실시간 구독 중지
   const stopRealTime = useCallback(() => {
     if (subscriptionRef.current) {
-      realtimeAPI.stopRealTimeSubscription(subscriptionRef.current);
+      // KIS API 구독인 경우
+      if (subscriptionRef.current.stop && typeof subscriptionRef.current.stop === 'function') {
+        subscriptionRef.current.stop();
+      } else {
+        // 기존 API 구독인 경우
+        realtimeAPI.stopRealTimeSubscription(subscriptionRef.current);
+      }
       subscriptionRef.current = null;
     }
     setIsRealTime(false);
@@ -142,8 +202,41 @@ export const useStockSearch = () => {
       setError(null);
 
       try {
-        const searchResults = await realtimeAPI.searchStocks(query, limit);
-        setResults(searchResults);
+        // 한국어 쿼리인지 판별
+        const isKoreanQuery = /[ㄱ-ㅎ|ㅏ-ㅣ|가-힣]/.test(query);
+        
+        let searchResults = [];
+        
+        if (isKoreanQuery || /^\d{6}$/.test(query)) {
+          // 한국 주식 검색 - KIS API 사용
+          const koreanResults = await kisAPI.searchStocks(query);
+          searchResults = koreanResults.map(stock => ({ ...stock, type: 'korean' }));
+        } else {
+          // 미국 주식 검색 - 무료 API 우선 사용
+          try {
+            const usResults = await freeUSStockAPI.searchUSStocks(query);
+            searchResults = usResults.map(stock => ({ ...stock, type: 'global', source: 'Free US API' }));
+          } catch (error) {
+            console.warn('무료 US 검색 실패, 기존 API로 시도:', error);
+            const globalResults = await realtimeAPI.searchStocks(query, limit);
+            searchResults = globalResults.map(stock => ({ ...stock, type: 'global' }));
+          }
+        }
+        
+        // 두 결과 합치기 (한국어가 포함된 경우)
+        if (isKoreanQuery) {
+          try {
+            const globalResults = await realtimeAPI.searchStocks(query, Math.max(0, limit - searchResults.length));
+            searchResults = [
+              ...searchResults,
+              ...globalResults.map(stock => ({ ...stock, type: 'global' }))
+            ];
+          } catch (globalError) {
+            console.warn('글로벌 검색 실패:', globalError);
+          }
+        }
+        
+        setResults(searchResults.slice(0, limit));
       } catch (err) {
         console.error('Stock search error:', err);
         setError(err.message);

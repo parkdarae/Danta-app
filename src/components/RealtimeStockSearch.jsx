@@ -1,5 +1,8 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import axios from 'axios';
+import kisAPI from '../services/kisAPI';
+import freeUSStockAPI from '../services/freeUSStockAPI';
+import { autoConvertToUSSymbol, findUSSymbol } from '../utils/stockSymbolMapping';
 
 const RealtimeStockSearch = ({ onStockSelect, darkMode = false, selectedStock }) => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -22,36 +25,68 @@ const RealtimeStockSearch = ({ onStockSelect, darkMode = false, selectedStock })
     error: '#f44336'
   };
 
-  // 한국 주식 검색 (예시 - 실제로는 KIS API나 다른 한국 증권 API 사용)
+  // 한국 주식 검색 (KIS API 사용)
   const searchKoreanStocks = async (query) => {
-    // 실제 구현에서는 한국투자증권 API나 다른 실시간 API를 사용
-    const mockStocks = [
-      { symbol: '005930', name: '삼성전자', market: 'KOSPI', price: 71000, change: 1.2 },
-      { symbol: '000660', name: 'SK하이닉스', market: 'KOSPI', price: 128000, change: -0.8 },
-      { symbol: '035720', name: '카카오', market: 'KOSPI', price: 45500, change: 2.1 },
-      { symbol: '051910', name: 'LG화학', market: 'KOSPI', price: 385000, change: 0.5 },
-      { symbol: '068270', name: '셀트리온', market: 'KOSPI', price: 178000, change: -1.5 },
-      { symbol: '028300', name: 'HLB', market: 'KOSDAQ', price: 32100, change: 3.2 },
-      { symbol: '041510', name: '에이지이글', market: 'KOSDAQ', price: 8840, change: 5.7 },
-      { symbol: '096770', name: 'SK이노베이션', market: 'KOSPI', price: 89400, change: -0.3 },
-      { symbol: '034220', name: 'LG디스플레이', market: 'KOSPI', price: 12950, change: 1.8 },
-      { symbol: '003550', name: 'LG', market: 'KOSPI', price: 85600, change: 0.9 }
-    ];
-
-    return mockStocks.filter(stock => 
-      stock.name.toLowerCase().includes(query.toLowerCase()) ||
-      stock.symbol.includes(query)
-    );
+    try {
+      // KIS API로 주식 검색
+      const searchResults = await kisAPI.searchStocks(query);
+      
+      // 검색 결과에 실시간 가격 추가
+      const stocksWithPrice = await Promise.all(
+        searchResults.slice(0, 5).map(async (stock) => {
+          try {
+            const priceData = await kisAPI.getCurrentPrice(stock.symbol);
+            return {
+              symbol: stock.symbol,
+              name: stock.name,
+              market: stock.market,
+              price: priceData.price,
+              change: priceData.changePercent,
+              source: priceData.source || 'KIS'
+            };
+          } catch (error) {
+            return {
+              symbol: stock.symbol,
+              name: stock.name,
+              market: stock.market,
+              price: null,
+              change: 0,
+              source: 'MOCK'
+            };
+          }
+        })
+      );
+      
+      return stocksWithPrice;
+    } catch (error) {
+      console.error('KIS 주식 검색 오류:', error);
+      // 에러 시 기본 목록 반환
+      return await kisAPI.getMockSearchResults(query);
+    }
   };
 
-  // 글로벌 주식 검색 (Alpha Vantage API 사용)
+  // 미국 주식 검색 (무료 API 사용)
   const searchGlobalStocks = async (query) => {
     try {
+      // 1순위: 무료 US Stock API 사용
+      const freeResults = await freeUSStockAPI.searchUSStocks(query);
+      if (freeResults && freeResults.length > 0) {
+        return freeResults.map(stock => ({
+          symbol: stock.symbol,
+          name: stock.name,
+          market: stock.market,
+          type: 'global',
+          price: null,
+          source: 'Free US API'
+        }));
+      }
+      
+      // 2순위: Alpha Vantage API (폴백)
       const response = await axios.get(`https://www.alphavantage.co/query`, {
         params: {
           function: 'SYMBOL_SEARCH',
           keywords: query,
-          apikey: 'demo' // 실제 사용시 API 키 필요
+          apikey: 'demo'
         }
       });
 
@@ -61,7 +96,8 @@ const RealtimeStockSearch = ({ onStockSelect, darkMode = false, selectedStock })
           name: match['2. name'],
           market: match['4. region'],
           type: match['3. type'],
-          price: null // 실시간 가격은 별도 API 호출 필요
+          price: null,
+          source: 'Alpha Vantage'
         }));
       }
       return [];
@@ -71,39 +107,58 @@ const RealtimeStockSearch = ({ onStockSelect, darkMode = false, selectedStock })
     }
   };
 
-  // 실시간 주가 조회
+  // 실시간 주가 조회 (KIS API + Alpha Vantage)
   const fetchRealTimePrice = async (symbol, market = 'KOR') => {
     try {
       if (market === 'KOR' || market === 'KOSPI' || market === 'KOSDAQ') {
-        // 한국 주식 - 실제로는 KIS API 사용
-        const mockPrice = {
-          symbol,
-          price: Math.floor(Math.random() * 100000) + 10000,
-          change: (Math.random() - 0.5) * 10,
-          volume: Math.floor(Math.random() * 1000000),
-          timestamp: new Date().toLocaleString()
+        // 한국 주식 - KIS API 사용
+        const priceData = await kisAPI.getCurrentPrice(symbol);
+        return {
+          symbol: priceData.symbol,
+          price: priceData.price,
+          change: priceData.changePercent,
+          volume: priceData.volume,
+          timestamp: priceData.timestamp,
+          source: priceData.source,
+          market: priceData.market
         };
-        return mockPrice;
       } else {
-        // 글로벌 주식 - Alpha Vantage API
-        const response = await axios.get(`https://www.alphavantage.co/query`, {
-          params: {
-            function: 'GLOBAL_QUOTE',
-            symbol: symbol,
-            apikey: 'demo'
-          }
-        });
-
-        const quote = response.data['Global Quote'];
-        if (quote) {
+        // 미국 주식 - 무료 API 우선 사용
+        try {
+          const freeData = await freeUSStockAPI.getUSStockData(symbol);
           return {
-            symbol: quote['01. symbol'],
-            price: parseFloat(quote['05. price']),
-            change: parseFloat(quote['09. change']),
-            changePercent: parseFloat(quote['10. change percent'].replace('%', '')),
-            volume: parseInt(quote['06. volume']),
-            timestamp: quote['07. latest trading day']
+            symbol: freeData.symbol,
+            price: freeData.price,
+            change: freeData.changePercent,
+            volume: freeData.volume,
+            timestamp: freeData.timestamp,
+            source: freeData.source,
+            market: freeData.market
           };
+        } catch (error) {
+          console.warn('무료 API 실패, Alpha Vantage로 시도:', error);
+          
+          // Alpha Vantage API 폴백
+          const response = await axios.get(`https://www.alphavantage.co/query`, {
+            params: {
+              function: 'GLOBAL_QUOTE',
+              symbol: symbol,
+              apikey: 'demo'
+            }
+          });
+
+          const quote = response.data['Global Quote'];
+          if (quote) {
+            return {
+              symbol: quote['01. symbol'],
+              price: parseFloat(quote['05. price']),
+              change: parseFloat(quote['09. change']),
+              changePercent: parseFloat(quote['10. change percent'].replace('%', '')),
+              volume: parseInt(quote['06. volume']),
+              timestamp: quote['07. latest trading day'],
+              source: 'Alpha Vantage (Fallback)'
+            };
+          }
         }
       }
     } catch (error) {
@@ -129,15 +184,50 @@ const RealtimeStockSearch = ({ onStockSelect, darkMode = false, selectedStock })
       setShowDropdown(true);
 
       try {
-        // 한국 주식과 글로벌 주식 동시 검색
-        const [koreanStocks, globalStocks] = await Promise.all([
-          searchKoreanStocks(query),
-          searchGlobalStocks(query)
-        ]);
+        // 한국어 → 미국 심볼 자동 변환 확인
+        const symbolConversion = autoConvertToUSSymbol(query);
+        
+        let koreanStocks = [];
+        let globalStocks = [];
+
+        if (symbolConversion.converted) {
+          // 한국어가 미국 심볼로 변환된 경우 - 글로벌 검색 우선
+          console.log(`🔄 "${query}" → "${symbolConversion.usSymbol}" 자동 변환`);
+          
+          // 변환된 미국 심볼로 검색
+          globalStocks = await searchGlobalStocks(symbolConversion.usSymbol);
+          
+          // 모든 가능한 심볼들도 검색
+          for (const possibleSymbol of symbolConversion.allPossibleSymbols.slice(1)) {
+            try {
+              const additionalResults = await searchGlobalStocks(possibleSymbol);
+              globalStocks = [...globalStocks, ...additionalResults];
+            } catch (error) {
+              console.warn(`심볼 ${possibleSymbol} 검색 실패:`, error);
+            }
+          }
+          
+          // 원래 한국어로도 검색 (만약 실제로 한국 주식인 경우)
+          koreanStocks = await searchKoreanStocks(query);
+        } else {
+          // 일반 검색 (한국 주식과 글로벌 주식 동시)
+          [koreanStocks, globalStocks] = await Promise.all([
+            searchKoreanStocks(query),
+            searchGlobalStocks(query)
+          ]);
+        }
 
         const combinedResults = [
-          ...koreanStocks.map(stock => ({ ...stock, type: 'korean' })),
-          ...globalStocks.map(stock => ({ ...stock, type: 'global' }))
+          ...globalStocks.map(stock => ({ 
+            ...stock, 
+            type: 'global',
+            converted: symbolConversion.converted,
+            originalQuery: symbolConversion.converted ? query : undefined
+          })),
+          ...koreanStocks.map(stock => ({ 
+            ...stock, 
+            type: 'korean' 
+          }))
         ].slice(0, 10);
 
         setSearchResults(combinedResults);
@@ -251,7 +341,13 @@ const RealtimeStockSearch = ({ onStockSelect, darkMode = false, selectedStock })
           type="text"
           value={searchTerm}
           onChange={handleSearchChange}
-          onFocus={() => searchTerm.length >= 2 && setShowDropdown(true)}
+          onFocus={(e) => {
+            searchTerm.length >= 2 && setShowDropdown(true);
+            e.target.style.borderColor = theme.accent;
+          }}
+          onBlur={(e) => {
+            e.target.style.borderColor = theme.border;
+          }}
           placeholder="종목명 또는 심볼을 입력하세요 (예: 삼성전자, AAPL)"
           style={{
             width: '100%',
@@ -264,8 +360,6 @@ const RealtimeStockSearch = ({ onStockSelect, darkMode = false, selectedStock })
             outline: 'none',
             transition: 'border-color 0.3s',
           }}
-          onFocus={(e) => e.target.style.borderColor = theme.accent}
-          onBlur={(e) => e.target.style.borderColor = theme.border}
         />
 
         {/* 로딩 인디케이터 */}
