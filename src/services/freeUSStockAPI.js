@@ -168,19 +168,24 @@ class FreeUSStockAPI {
     return await this.getYahooStockPrice(symbol);
   }
 
-  // Finnhub 무료 API
+  // Finnhub 무료 API (더 안정적)
   async getFinnhubStockPrice(symbol) {
     try {
-      // Finnhub 무료 API (토큰: demo)
-      const response = await axios.get(`https://finnhub.io/api/v1/quote`, {
-        params: {
-          symbol: symbol,
-          token: 'demo' // demo 토큰 (제한적)
-        },
-        timeout: 5000
+      // Finnhub는 CORS 문제가 있을 수 있으므로 프록시 사용
+      const proxyUrl = 'https://api.allorigins.win/raw?url=';
+      const finnhubUrl = `https://finnhub.io/api/v1/quote?symbol=${symbol}&token=demo`;
+      
+      const response = await axios.get(proxyUrl + encodeURIComponent(finnhubUrl), {
+        timeout: 8000,
+        headers: {
+          'Accept': 'application/json'
+        }
       });
 
-      if (response.data && response.data.c) {
+      if (response.data && response.data.c !== undefined && response.data.c !== 0) {
+        // 실제 데이터 수신 성공
+        console.log(`✅ ${symbol} Finnhub 실시간 데이터:`, response.data);
+        
         return {
           symbol: symbol.toUpperCase(),
           name: symbol,
@@ -190,32 +195,35 @@ class FreeUSStockAPI {
           high: response.data.h, // high
           low: response.data.l, // low
           open: response.data.o, // open
-          volume: 0, // Finnhub 무료 티어에서는 제한
+          previousClose: response.data.pc, // previous close
+          volume: 0, // Finnhub 무료 티어 제한
           timestamp: new Date().toISOString(),
-          source: 'Finnhub (Free)',
+          source: 'Finnhub (실시간)',
           market: 'US',
-          currency: 'USD'
+          currency: 'USD',
+          isRealTime: true
         };
+      } else {
+        throw new Error('Finnhub: 유효하지 않은 응답');
       }
     } catch (error) {
-      console.error('Finnhub 오류:', error);
+      console.warn(`Finnhub ${symbol} 조회 실패:`, error.message);
+      throw error;
     }
-
-    // 실패 시 Yahoo Finance로 폴백
-    return await this.getYahooStockPrice(symbol);
   }
 
   // 통합 미국 주식 조회
   async getUSStockData(symbol) {
     try {
-      // 1순위: Yahoo Finance (완전 무료)
-      return await this.getYahooStockPrice(symbol);
+      // 1순위: Finnhub (demo 토큰) - 더 안정적
+      return await this.getFinnhubStockPrice(symbol);
     } catch (error) {
       try {
-        // 2순위: Finnhub (demo 토큰)
-        return await this.getFinnhubStockPrice(symbol);
-      } catch (finnhubError) {
-        // 3순위: 모의 데이터
+        // 2순위: Yahoo Finance (CORS 문제로 실패 가능성 높음)
+        return await this.getYahooStockPrice(symbol);
+      } catch (yahooError) {
+        // 3순위: 고품질 모의 데이터 (항상 작동)
+        console.log(`📊 ${symbol} - Mock 데이터 사용 (실제 API 연결 시 실시간 데이터)`);
         return this.generateMockUSStockData(symbol);
       }
     }
@@ -224,7 +232,10 @@ class FreeUSStockAPI {
   // 주식 검색
   async searchUSStocks(query) {
     try {
-      return await this.searchYahooStocks(query);
+      // 실제 API는 CORS 문제로 브라우저에서 호출 불가
+      // 고품질 Mock 데이터로 일관된 사용자 경험 제공
+      console.log(`🔍 "${query}" 검색 - Mock 데이터 사용 (실제 API 연결 시 실시간 검색)`);
+      return this.getMockSearchResults(query);
     } catch (error) {
       return this.getMockSearchResults(query);
     }
@@ -233,16 +244,28 @@ class FreeUSStockAPI {
   // 모의 데이터 생성 (API 실패 시)
   generateMockUSStockData(symbol) {
     const mockCompanies = {
-      'ACEL': { name: 'Accel Entertainment Inc', basePrice: 12.50 },
-      'EAGLE': { name: 'Eagle Pharmaceuticals Inc', basePrice: 45.30 },
-      'AAPL': { name: 'Apple Inc', basePrice: 195.50 },
-      'TSLA': { name: 'Tesla Inc', basePrice: 248.50 },
-      'GOOGL': { name: 'Alphabet Inc', basePrice: 138.50 },
-      'MSFT': { name: 'Microsoft Corp', basePrice: 420.50 },
-      'NVDA': { name: 'NVIDIA Corp', basePrice: 875.30 },
-      'META': { name: 'Meta Platforms Inc', basePrice: 515.20 },
-      'AMZN': { name: 'Amazon.com Inc', basePrice: 185.40 },
-      'BA': { name: 'Boeing Co', basePrice: 178.90 }
+      // 에이지이글에어리얼사 관련 실제 미국 상장 주식들
+      'ACEL': { name: 'Accel Entertainment Inc', basePrice: 12.50, sector: 'Gaming & Entertainment' },
+      'EAGLE': { name: 'Eagle Pharmaceuticals Inc', basePrice: 45.30, sector: 'Pharmaceuticals' },
+      'AEGL': { name: 'Aeglea BioTherapeutics Inc', basePrice: 2.15, sector: 'Biotechnology' },
+      'AGE': { name: 'AgeX Therapeutics Inc', basePrice: 0.85, sector: 'Biotechnology' },
+      'AERI': { name: 'Aerie Pharmaceuticals Inc', basePrice: 8.75, sector: 'Pharmaceuticals' },
+      
+      // 주요 미국 주식들
+      'AAPL': { name: 'Apple Inc', basePrice: 195.50, sector: 'Technology' },
+      'TSLA': { name: 'Tesla Inc', basePrice: 248.50, sector: 'Electric Vehicles' },
+      'GOOGL': { name: 'Alphabet Inc', basePrice: 138.50, sector: 'Technology' },
+      'MSFT': { name: 'Microsoft Corp', basePrice: 420.50, sector: 'Technology' },
+      'NVDA': { name: 'NVIDIA Corp', basePrice: 875.30, sector: 'Semiconductors' },
+      'META': { name: 'Meta Platforms Inc', basePrice: 515.20, sector: 'Social Media' },
+      'AMZN': { name: 'Amazon.com Inc', basePrice: 185.40, sector: 'E-commerce' },
+      'BA': { name: 'Boeing Co', basePrice: 178.90, sector: 'Aerospace' },
+      
+      // 추가 항공/에어리얼 관련 주식들
+      'AAL': { name: 'American Airlines Group', basePrice: 14.25, sector: 'Airlines' },
+      'DAL': { name: 'Delta Air Lines Inc', basePrice: 52.80, sector: 'Airlines' },
+      'UAL': { name: 'United Airlines Holdings', basePrice: 58.90, sector: 'Airlines' },
+      'LUV': { name: 'Southwest Airlines Co', basePrice: 28.15, sector: 'Airlines' }
     };
 
     const company = mockCompanies[symbol.toUpperCase()] || { 
@@ -276,29 +299,71 @@ class FreeUSStockAPI {
   // 모의 검색 결과
   getMockSearchResults(query) {
     const mockResults = [
-      { symbol: 'ACEL', name: 'Accel Entertainment Inc', market: 'NASDAQ' },
-      { symbol: 'EAGLE', name: 'Eagle Pharmaceuticals Inc', market: 'NASDAQ' },
-      { symbol: 'AEGL', name: 'Aeglea BioTherapeutics Inc', market: 'NASDAQ' },
-      { symbol: 'AAPL', name: 'Apple Inc', market: 'NASDAQ' },
-      { symbol: 'TSLA', name: 'Tesla Inc', market: 'NASDAQ' },
-      { symbol: 'GOOGL', name: 'Alphabet Inc', market: 'NASDAQ' },
-      { symbol: 'MSFT', name: 'Microsoft Corp', market: 'NASDAQ' },
-      { symbol: 'NVDA', name: 'NVIDIA Corp', market: 'NASDAQ' },
-      { symbol: 'META', name: 'Meta Platforms Inc', market: 'NASDAQ' },
-      { symbol: 'AMZN', name: 'Amazon.com Inc', market: 'NASDAQ' }
+      // 에이지이글에어리얼사 관련 주식들 (우선순위)
+      { symbol: 'ACEL', name: 'Accel Entertainment Inc', market: 'NASDAQ', sector: 'Gaming', keywords: ['accel', 'entertainment', '에이지이글', 'eagle'] },
+      { symbol: 'EAGLE', name: 'Eagle Pharmaceuticals Inc', market: 'NASDAQ', sector: 'Pharma', keywords: ['eagle', 'pharmaceuticals', '에이지이글', '독수리'] },
+      { symbol: 'AEGL', name: 'Aeglea BioTherapeutics Inc', market: 'NASDAQ', sector: 'Biotech', keywords: ['aeglea', 'bio', 'eagle', '에이지이글'] },
+      { symbol: 'AGE', name: 'AgeX Therapeutics Inc', market: 'NASDAQ', sector: 'Biotech', keywords: ['age', 'therapeutics', '에이지', 'agex'] },
+      { symbol: 'AERI', name: 'Aerie Pharmaceuticals Inc', market: 'NASDAQ', sector: 'Pharma', keywords: ['aerie', 'aerial', '에어리얼', 'pharmaceuticals'] },
+      
+      // 항공/에어리얼 관련
+      { symbol: 'AAL', name: 'American Airlines Group', market: 'NASDAQ', sector: 'Airlines', keywords: ['american', 'airlines', 'aerial', '항공', '에어리얼'] },
+      { symbol: 'DAL', name: 'Delta Air Lines Inc', market: 'NYSE', sector: 'Airlines', keywords: ['delta', 'airlines', 'aerial', '항공'] },
+      { symbol: 'BA', name: 'Boeing Co', market: 'NYSE', sector: 'Aerospace', keywords: ['boeing', 'aerospace', 'aerial', '항공우주'] },
+      
+      // 주요 미국 주식들
+      { symbol: 'AAPL', name: 'Apple Inc', market: 'NASDAQ', sector: 'Technology', keywords: ['apple', 'tech', '애플'] },
+      { symbol: 'TSLA', name: 'Tesla Inc', market: 'NASDAQ', sector: 'EV', keywords: ['tesla', 'electric', '테슬라'] },
+      { symbol: 'GOOGL', name: 'Alphabet Inc', market: 'NASDAQ', sector: 'Technology', keywords: ['google', 'alphabet', '구글'] },
+      { symbol: 'MSFT', name: 'Microsoft Corp', market: 'NASDAQ', sector: 'Technology', keywords: ['microsoft', '마이크로소프트'] },
+      { symbol: 'NVDA', name: 'NVIDIA Corp', market: 'NASDAQ', sector: 'Semiconductors', keywords: ['nvidia', '엔비디아'] },
+      { symbol: 'META', name: 'Meta Platforms Inc', market: 'NASDAQ', sector: 'Social Media', keywords: ['meta', 'facebook', '메타'] },
+      { symbol: 'AMZN', name: 'Amazon.com Inc', market: 'NASDAQ', sector: 'E-commerce', keywords: ['amazon', '아마존'] }
     ];
 
+    const queryLower = query.toLowerCase();
     const queryUpper = query.toUpperCase();
-    return mockResults
-      .filter(stock => 
-        stock.symbol.includes(queryUpper) || 
-        stock.name.toUpperCase().includes(queryUpper)
-      )
+    
+    // 스마트 검색: 심볼, 이름, 키워드 모두 매칭
+    const filteredResults = mockResults.filter(stock => {
+      const symbolMatch = stock.symbol.includes(queryUpper);
+      const nameMatch = stock.name.toUpperCase().includes(queryUpper);
+      const keywordMatch = stock.keywords.some(keyword => 
+        keyword.toLowerCase().includes(queryLower) || 
+        queryLower.includes(keyword.toLowerCase())
+      );
+      
+      return symbolMatch || nameMatch || keywordMatch;
+    });
+
+    // 관련도 점수 계산 (에이지이글 관련 주식 우선)
+    const scoredResults = filteredResults.map(stock => {
+      let score = 0;
+      
+      // 정확한 심볼 매치 = 높은 점수
+      if (stock.symbol === queryUpper) score += 100;
+      else if (stock.symbol.includes(queryUpper)) score += 50;
+      
+      // 에이지이글/에어리얼 관련 키워드 = 높은 점수  
+      if (stock.keywords.some(k => ['에이지이글', 'eagle', '에어리얼', 'aerial'].includes(k))) score += 30;
+      
+      // 이름 매치 = 중간 점수
+      if (stock.name.toUpperCase().includes(queryUpper)) score += 20;
+      
+      return { ...stock, score };
+    });
+
+    // 점수순으로 정렬 후 상위 5개 반환
+    return scoredResults
+      .sort((a, b) => b.score - a.score)
       .slice(0, 5)
       .map(stock => ({ 
-        ...stock, 
+        symbol: stock.symbol,
+        name: stock.name,
+        market: stock.market,
         type: 'global',
-        source: 'Mock Data'
+        source: 'Mock Data',
+        sector: stock.sector
       }));
   }
 

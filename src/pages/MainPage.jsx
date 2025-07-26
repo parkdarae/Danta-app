@@ -23,6 +23,7 @@ import DataExportPanel from '../components/DataExportPanel';
 import DataMiningFramework from '../components/DataMiningFramework';
 import AutoReportGenerator from '../components/AutoReportGenerator';
 import PerformanceMonitor from '../components/PerformanceMonitor';
+import SimpleTOSTable from '../components/SimpleTOSTable';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { STORAGE_KEYS, STOCKS } from '../utils/constants';
 
@@ -54,6 +55,9 @@ function MainPage() {
               onStockSelect={(stockData) => setSelectedStock(stockData.name)} 
               darkMode={darkMode}
               selectedStock={selectedStock}
+            />
+            <SimpleTOSTable 
+              darkMode={darkMode}
             />
             <div style={{ textAlign: 'center', marginBottom: 8, display: 'flex', justifyContent: 'center', gap: 8 }}>
               <button

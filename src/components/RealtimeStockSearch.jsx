@@ -192,7 +192,8 @@ const RealtimeStockSearch = ({ onStockSelect, darkMode = false, selectedStock })
 
         if (symbolConversion.converted) {
           // 한국어가 미국 심볼로 변환된 경우 - 글로벌 검색 우선
-          console.log(`🔄 "${query}" → "${symbolConversion.usSymbol}" 자동 변환`);
+          console.log(`🔄 한글→미국주식 변환: "${query}" → "${symbolConversion.usSymbol}"`);
+          console.log(`📝 가능한 모든 심볼: [${symbolConversion.allPossibleSymbols.join(', ')}]`);
           
           // 변환된 미국 심볼로 검색
           globalStocks = await searchGlobalStocks(symbolConversion.usSymbol);
