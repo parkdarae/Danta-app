@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>채쌤 3.0 - 테스트 페이지</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            text-align: center;
+        }
+        
+        .container {
+            max-width: 600px;
+            padding: 40px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        
+        .emoji {
+            font-size: 80px;
+            margin-bottom: 20px;
+            animation: bounce 2s infinite;
+        }
+        
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-30px); }
+            60% { transform: translateY(-15px); }
+        }
+        
+        h1 {
+            font-size: 2.5em;
+            margin: 20px 0;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        p {
+            font-size: 1.2em;
+            line-height: 1.6;
+            margin: 20px 0;
+        }
+        
+        .status {
+            background: #4CAF50;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-weight: bold;
+            font-size: 1.1em;
+            margin: 20px 0;
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.4);
+        }
+        
+        .info {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+            font-size: 0.9em;
+        }
+        
+        button {
+            background: #61dafb;
+            color: #282c34;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 10px;
+            transition: all 0.3s ease;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(97, 218, 251, 0.4);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="emoji">🏌️‍♀️</div>
+        <h1>채쌤 3.0 테스트</h1>
+        <p>
+            안녕하세요 다룡아! 🎉<br/>
+            이 페이지가 보인다면 GitHub Pages가 정상 작동하고 있어요!
+        </p>
+        
+        <div class="status">
+            ✅ HTML 페이지 정상 로딩!
+        </div>
+        
+        <div class="info">
+            <strong>🔍 진단 결과:</strong><br/>
+            • GitHub Pages 서버: 정상<br/>
+            • 도메인 연결: 정상<br/>
+            • HTML 렌더링: 정상<br/>
+            • 브라우저 호환성: 정상
+        </div>
+        
+        <p>
+            만약 이 페이지가 보인다면, React 앱의 문제일 가능성이 높아요.<br/>
+            조금만 기다려주세요! 곧 해결할게요! 💪
+        </p>
+        
+        <button onclick="location.reload()">🔄 새로고침</button>
+        <button onclick="history.back()">← 뒤로가기</button>
+        
+        <div style="margin-top: 40px; font-size: 0.8em; opacity: 0.7;">
+            현재 시간: <span id="time"></span><br/>
+            테스트 버전: v3.0-debug
+        </div>
+    </div>
+    
+    <script>
+        // 현재 시간 표시
+        function updateTime() {
+            const now = new Date();
+            document.getElementById('time').textContent = now.toLocaleString('ko-KR');
+        }
+        updateTime();
+        setInterval(updateTime, 1000);
+        
+        // 페이지 로딩 성공 알림
+        console.log('🎉 채쌤 3.0 테스트 페이지가 성공적으로 로딩되었습니다!');
+        console.log('📊 브라우저 정보:', navigator.userAgent);
+        console.log('🌐 현재 URL:', window.location.href);
+    </script>
+</body>
+</html> 
