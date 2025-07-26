@@ -1,7 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
+import { useTheme } from '../hooks/useTheme';
+import { useTypography } from '../hooks/useTypography';
+import EnhancedButton from './EnhancedButton';
 
 const CategoryNavigation = ({ currentCategory, onCategoryChange, darkMode = false }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [focusedIndex, setFocusedIndex] = useState(-1);
+  const menuRef = useRef(null);
+  const theme = useTheme(darkMode);
+  const typography = useTypography(darkMode);
 
   const categories = [
     {
@@ -48,14 +55,39 @@ const CategoryNavigation = ({ currentCategory, onCategoryChange, darkMode = fals
     }
   ];
 
-  const theme = {
-    background: darkMode ? '#1a1a1a' : '#ffffff',
-    text: darkMode ? '#e0e0e0' : '#333333',
-    accent: '#8884d8',
-    border: darkMode ? '#333333' : '#e0e0e0',
-    hover: darkMode ? '#2a2a2a' : '#f5f5f5',
-    overlay: darkMode ? 'rgba(0,0,0,0.8)' : 'rgba(0,0,0,0.5)'
-  };
+  // 키보드 네비게이션 지원
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (!isMenuOpen) return;
+      
+      switch (e.key) {
+        case 'Escape':
+          setIsMenuOpen(false);
+          setFocusedIndex(-1);
+          break;
+        case 'ArrowDown':
+          e.preventDefault();
+          setFocusedIndex(prev => 
+            prev < categories.length - 1 ? prev + 1 : 0
+          );
+          break;
+        case 'ArrowUp':
+          e.preventDefault();
+          setFocusedIndex(prev => 
+            prev > 0 ? prev - 1 : categories.length - 1
+          );
+          break;
+        case 'Enter':
+          if (focusedIndex >= 0) {
+            handleCategorySelect(categories[focusedIndex].id);
+          }
+          break;
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isMenuOpen, focusedIndex, categories]);
 
   const handleCategorySelect = (categoryId) => {
     onCategoryChange(categoryId);
@@ -65,34 +97,25 @@ const CategoryNavigation = ({ currentCategory, onCategoryChange, darkMode = fals
   return (
     <>
       {/* 햄버거 메뉴 버튼 */}
-      <button
+      <EnhancedButton
         onClick={() => setIsMenuOpen(true)}
+        variant="primary"
+        size="normal"
+        icon="☰"
+        tooltip="카테고리 메뉴 열기 (단축키: M)"
+        darkMode={darkMode}
+        data-guide="category-button"
         style={{
           position: 'fixed',
           top: '20px',
           left: '20px',
           zIndex: 1000,
-          background: theme.accent,
-          border: 'none',
-          borderRadius: '8px',
-          padding: '12px',
-          color: 'white',
-          fontSize: '18px',
-          cursor: 'pointer',
-          boxShadow: '0 2px 10px rgba(0,0,0,0.2)',
-          transition: 'all 0.3s ease'
+          width: '48px',
+          height: '48px',
+          padding: '0',
+          borderRadius: '12px'
         }}
-        onMouseEnter={(e) => {
-          e.target.style.transform = 'scale(1.05)';
-          e.target.style.boxShadow = '0 4px 15px rgba(0,0,0,0.3)';
-        }}
-        onMouseLeave={(e) => {
-          e.target.style.transform = 'scale(1)';
-          e.target.style.boxShadow = '0 2px 10px rgba(0,0,0,0.2)';
-        }}
-      >
-        ☰
-      </button>
+      />
 
       {/* 카테고리 선택 모달 */}
       {isMenuOpen && (
@@ -103,26 +126,29 @@ const CategoryNavigation = ({ currentCategory, onCategoryChange, darkMode = fals
             left: 0,
             right: 0,
             bottom: 0,
-            background: theme.overlay,
+            background: 'rgba(0, 0, 0, 0.75)',
             zIndex: 1001,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
+            backdropFilter: 'blur(8px)',
             animation: 'fadeIn 0.3s ease'
           }}
           onClick={() => setIsMenuOpen(false)}
         >
           <div
+            ref={menuRef}
             style={{
-              background: theme.background,
-              borderRadius: '16px',
-              padding: '30px',
-              maxWidth: '600px',
+              background: theme.bg,
+              borderRadius: '20px',
+              padding: '32px',
+              maxWidth: '640px',
               width: '90%',
-              maxHeight: '80vh',
+              maxHeight: '85vh',
               overflowY: 'auto',
-              boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
-              border: `1px solid ${theme.border}`,
+              boxShadow: theme.shadows.xl,
+              border: `2px solid ${theme.border}`,
+              fontFamily: typography.fontFamily.primary,
               animation: 'slideUp 0.3s ease'
             }}
             onClick={(e) => e.stopPropagation()}
@@ -132,142 +158,147 @@ const CategoryNavigation = ({ currentCategory, onCategoryChange, darkMode = fals
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
-              marginBottom: '25px',
+              marginBottom: '28px',
               borderBottom: `2px solid ${theme.border}`,
-              paddingBottom: '15px'
+              paddingBottom: '20px'
             }}>
               <h2 style={{
+                ...typography.presets.heading.h2,
+                color: typography.colors.primary,
                 margin: 0,
-                color: theme.text,
-                fontSize: '24px',
-                fontWeight: 'bold'
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px'
               }}>
-                📂 카테고리 선택
+                📂 <span>카테고리 선택</span>
               </h2>
-              <button
+              <EnhancedButton
                 onClick={() => setIsMenuOpen(false)}
+                variant="ghost"
+                size="small"
+                icon="✕"
+                tooltip="닫기 (Esc)"
+                darkMode={darkMode}
                 style={{
-                  background: 'none',
-                  border: 'none',
-                  fontSize: '24px',
-                  color: theme.text,
-                  cursor: 'pointer',
-                  padding: '5px',
-                  borderRadius: '4px'
+                  width: '36px',
+                  height: '36px',
+                  padding: '0'
                 }}
-                onMouseEnter={(e) => {
-                  e.target.style.background = theme.hover;
-                }}
-                onMouseLeave={(e) => {
-                  e.target.style.background = 'none';
-                }}
-              >
-                ✕
-              </button>
+              />
             </div>
 
             {/* 현재 선택된 카테고리 표시 */}
             <div style={{
-              background: `${theme.accent}20`,
+              background: `${theme.accent}15`,
               border: `2px solid ${theme.accent}`,
-              borderRadius: '8px',
-              padding: '12px',
-              marginBottom: '20px',
+              borderRadius: '12px',
+              padding: '16px',
+              marginBottom: '24px',
               textAlign: 'center'
             }}>
-              <span style={{ color: theme.accent, fontWeight: 'bold' }}>
-                현재: {categories.find(cat => cat.id === currentCategory)?.name || '📈 트레이딩'}
-              </span>
+              <div style={{ 
+                ...typography.presets.label,
+                color: typography.colors.muted,
+                marginBottom: '4px'
+              }}>
+                현재 선택된 카테고리
+              </div>
+              <div style={{ 
+                ...typography.presets.body.large,
+                color: theme.accent, 
+                fontWeight: typography.fontWeight.bold
+              }}>
+                {categories.find(cat => cat.id === currentCategory)?.name || '📈 트레이딩'}
+              </div>
             </div>
 
             {/* 카테고리 목록 */}
             <div style={{
               display: 'grid',
-              gap: '15px'
+              gap: '16px'
             }}>
-              {categories.map((category) => (
-                <div
+              {categories.map((category, index) => (
+                <EnhancedButton
                   key={category.id}
                   onClick={() => handleCategorySelect(category.id)}
+                  variant={currentCategory === category.id ? "primary" : "secondary"}
+                  size="large"
+                  darkMode={darkMode}
+                  data-guide={category.id === 'discovery' ? 'keyword-discovery' : undefined}
                   style={{
-                    background: currentCategory === category.id ? `${theme.accent}20` : theme.hover,
-                    border: currentCategory === category.id ? `2px solid ${theme.accent}` : `1px solid ${theme.border}`,
-                    borderRadius: '12px',
+                    width: '100%',
+                    height: 'auto',
                     padding: '20px',
-                    cursor: 'pointer',
-                    transition: 'all 0.3s ease',
-                    position: 'relative'
-                  }}
-                  onMouseEnter={(e) => {
-                    if (currentCategory !== category.id) {
-                      e.target.style.transform = 'translateY(-2px)';
-                      e.target.style.boxShadow = '0 8px 25px rgba(0,0,0,0.15)';
-                      e.target.style.background = `${theme.accent}10`;
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (currentCategory !== category.id) {
-                      e.target.style.transform = 'translateY(0)';
-                      e.target.style.boxShadow = 'none';
-                      e.target.style.background = theme.hover;
-                    }
+                    justifyContent: 'flex-start',
+                    background: focusedIndex === index ? `${theme.accent}20` : undefined,
+                    border: focusedIndex === index ? `2px solid ${theme.accent}` : undefined
                   }}
                 >
                   <div style={{
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '15px'
+                    gap: '16px',
+                    width: '100%'
                   }}>
                     <div style={{
-                      fontSize: '32px',
-                      minWidth: '50px',
+                      fontSize: '36px',
+                      minWidth: '54px',
                       textAlign: 'center'
                     }}>
                       {category.icon}
                     </div>
                     <div style={{ flex: 1 }}>
                       <h3 style={{
-                        margin: 0,
-                        color: theme.text,
-                        fontSize: '18px',
-                        fontWeight: 'bold',
-                        marginBottom: '5px'
+                        ...typography.presets.heading.h4,
+                        color: currentCategory === category.id ? 'white' : typography.colors.primary,
+                        margin: '0 0 6px 0'
                       }}>
                         {category.name}
                       </h3>
                       <p style={{
+                        ...typography.presets.body.small,
+                        color: currentCategory === category.id ? 'rgba(255,255,255,0.8)' : typography.colors.secondary,
                         margin: 0,
-                        color: darkMode ? '#aaa' : '#666',
-                        fontSize: '14px',
-                        lineHeight: '1.4'
+                        lineHeight: typography.lineHeight.normal
                       }}>
                         {category.description}
                       </p>
                     </div>
                     {currentCategory === category.id && (
                       <div style={{
-                        color: theme.accent,
-                        fontSize: '20px',
-                        fontWeight: 'bold'
+                        color: 'white',
+                        fontSize: '24px',
+                        fontWeight: typography.fontWeight.bold
                       }}>
                         ✓
                       </div>
                     )}
                   </div>
-                </div>
+                </EnhancedButton>
               ))}
             </div>
 
             {/* 하단 안내 */}
             <div style={{
-              marginTop: '25px',
+              marginTop: '28px',
               textAlign: 'center',
-              color: darkMode ? '#888' : '#666',
-              fontSize: '12px',
               borderTop: `1px solid ${theme.border}`,
-              paddingTop: '15px'
+              paddingTop: '20px'
             }}>
-              💡 카테고리를 선택하면 해당 기능들이 표시됩니다
+              <div style={{
+                ...typography.presets.caption,
+                color: typography.colors.muted,
+                marginBottom: '8px'
+              }}>
+                💡 키보드 단축키
+              </div>
+              <div style={{
+                ...typography.presets.body.xs,
+                color: typography.colors.muted,
+                lineHeight: typography.lineHeight.relaxed
+              }}>
+                ↑↓ 선택 | Enter 확인 | Esc 닫기 | M 메뉴
+              </div>
             </div>
           </div>
         </div>

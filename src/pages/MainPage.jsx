@@ -29,7 +29,10 @@ import StockAlertSystem from '../components/StockAlertSystem';
 import EmotionalTradingTracker from '../components/EmotionalTradingTracker';
 import MetaCognitionReport from '../components/MetaCognitionReport';
 import KeywordToStockWorkflow from '../components/KeywordToStockWorkflow';
+import AIStockMentor from '../components/AIStockMentor';
+import InteractiveGuide from '../components/InteractiveGuide';
 import { useLocalStorage } from '../hooks/useLocalStorage';
+import { useTypography } from '../hooks/useTypography';
 import { STORAGE_KEYS, STOCKS } from '../utils/constants';
 
 function MainPage() {
@@ -42,6 +45,11 @@ function MainPage() {
   const [currentCategory, setCurrentCategory] = useLocalStorage('current_category', 'trading');
   const [userWatchlist, setUserWatchlist] = useState(['UAVS', 'AAPL', 'TSLA', 'NVDA', 'MSFT', 'GOOGL', 'META']);
   const [userPortfolio, setUserPortfolio] = useState([]);
+  const [isFirstVisit, setIsFirstVisit] = useLocalStorage('is_first_visit', true);
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [generatedKeywords, setGeneratedKeywords] = useState([]);
+  
+  const typography = useTypography(darkMode);
 
   const toggleDarkMode = useCallback(() => {
     setDarkMode(dm => !dm);
@@ -233,6 +241,7 @@ function MainPage() {
             <KeywordToStockWorkflow 
               darkMode={darkMode}
               onStockSelect={(stock) => setSelectedStock(stock.symbol || stock.name)}
+              onKeywordsGenerated={(keywords) => setGeneratedKeywords(keywords)}
             />
           </>
         );
@@ -372,6 +381,28 @@ function MainPage() {
 
       {/* 성능 모니터 */}
       <PerformanceMonitor darkMode={darkMode} />
+      
+      {/* AI 주식 멘토 시스템 */}
+      <AIStockMentor
+        darkMode={darkMode}
+        currentSection={currentCategory}
+        userLevel="beginner"
+        keywords={generatedKeywords}
+        selectedStock={selectedStock}
+        isFirstVisit={isFirstVisit}
+        data-guide="ai-mentor"
+      />
+      
+      {/* 인터랙티브 가이드 */}
+      <InteractiveGuide
+        darkMode={darkMode}
+        currentSection={currentCategory}
+        showOnboarding={isFirstVisit}
+        onComplete={() => {
+          setIsFirstVisit(false);
+          setShowOnboarding(false);
+        }}
+      />
     </div>
   );
 }

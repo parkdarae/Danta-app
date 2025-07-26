@@ -2,7 +2,7 @@ import React, { useState, useCallback } from 'react';
 import KeywordBrainstormingSystem from './KeywordBrainstormingSystem';
 import StockDiscoveryEngine from './StockDiscoveryEngine';
 
-const KeywordToStockWorkflow = ({ darkMode = false, onStockSelect }) => {
+const KeywordToStockWorkflow = ({ darkMode = false, onStockSelect, onKeywordsGenerated }) => {
   const [currentStep, setCurrentStep] = useState(1); // 1: 브레인스토밍, 2: 종목 발굴
   const [generatedKeywords, setGeneratedKeywords] = useState([]);
   const [discoveredStocks, setDiscoveredStocks] = useState([]);
@@ -26,8 +26,9 @@ const KeywordToStockWorkflow = ({ darkMode = false, onStockSelect }) => {
   const handleKeywordsGenerated = useCallback((keywords) => {
     setGeneratedKeywords(keywords);
     setCurrentStep(2);
+    onKeywordsGenerated?.(keywords); // 부모 컴포넌트에 키워드 전달
     console.log('🧠 키워드 생성 완료:', keywords);
-  }, []);
+  }, [onKeywordsGenerated]);
 
   // 종목 추적 시작 처리
   const handleStockTrack = useCallback((stock) => {
