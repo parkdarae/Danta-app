@@ -1,31 +1,9 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import { useLocalStorage } from '../hooks/useLocalStorage';
+import { useTheme } from '../hooks/useTheme';
 
-const KeywordBrainstormingSystem = ({ darkMode = false, onKeywordsGenerated }) => {
-  const [currentKeywords, setCurrentKeywords] = useState([]);
-  const [inputKeyword, setInputKeyword] = useState('');
-  const [savedSessions, setSavedSessions] = useLocalStorage('keyword_sessions', []);
-  const [currentSessionName, setCurrentSessionName] = useState('');
-  const [showAIPrompts, setShowAIPrompts] = useState(false);
-  const [selectedPromptAnswers, setSelectedPromptAnswers] = useState({});
-
-  const theme = {
-    bg: darkMode ? '#1a1a1a' : '#ffffff',
-    cardBg: darkMode ? '#2d2d2d' : '#f8f9fa',
-    text: darkMode ? '#ffffff' : '#333333',
-    subtext: darkMode ? '#cccccc' : '#666666',
-    border: darkMode ? '#404040' : '#e0e0e0',
-    accent: '#007bff',
-    positive: '#00c851',
-    negative: '#ff4444',
-    warning: '#ffbb33',
-    purple: '#9c27b0',
-    teal: '#20c997',
-    orange: '#ff6b35'
-  };
-
-  // AI 보조 질문들
-  const aiPrompts = [
+// AI 프롬프트는 컴포넌트 외부로 이동하여 재생성 방지
+const AI_PROMPTS = [
     {
       id: 'industry',
       question: '🏭 지금 가장 주목하는 산업은?',
@@ -77,6 +55,16 @@ const KeywordBrainstormingSystem = ({ darkMode = false, onKeywordsGenerated }) =
       ]
     }
   ];
+
+const KeywordBrainstormingSystem = ({ darkMode = false, onKeywordsGenerated }) => {
+  const [currentKeywords, setCurrentKeywords] = useState([]);
+  const [inputKeyword, setInputKeyword] = useState('');
+  const [savedSessions, setSavedSessions] = useLocalStorage('keyword_sessions', []);
+  const [currentSessionName, setCurrentSessionName] = useState('');
+  const [showAIPrompts, setShowAIPrompts] = useState(false);
+  const [selectedPromptAnswers, setSelectedPromptAnswers] = useState({});
+
+  const theme = useTheme(darkMode);
 
   // 키워드 추가
   const addKeyword = useCallback((keyword) => {
@@ -231,7 +219,7 @@ const KeywordBrainstormingSystem = ({ darkMode = false, onKeywordsGenerated }) =
               🤖 AI 브레인스토밍 도우미
             </h3>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-              {aiPrompts.map(prompt => (
+              {AI_PROMPTS.map(prompt => (
                 <div
                   key={prompt.id}
                   style={{

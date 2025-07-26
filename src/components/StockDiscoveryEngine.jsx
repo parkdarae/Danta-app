@@ -1,37 +1,76 @@
 import React, { useState, useMemo, useCallback } from 'react';
-import { searchStocks, getPopularStocks } from '../data/stockMasterDB';
+import { searchStocks } from '../data/stockMasterDB';
 import { useLocalStorage } from '../hooks/useLocalStorage';
+import { useTheme } from '../hooks/useTheme';
+import VirtualizedStockList from './VirtualizedStockList';
+
+// 점수 계산 로직을 별도 함수로 분리하여 재사용성 향상
+const calculateMemeScore = (stock, keywords, baseScore = 30) => {
+  let score = baseScore;
+  
+  const memeKeywords = ['밈', 'meme', '레딧', 'reddit', '소셜', 'YOLO', '개미', '급등'];
+  const techKeywords = ['AI', '드론', '전기차', '게임', '우주', '항공'];
+  const volatileKeywords = ['우크라이나', '국방', '에너지', '암호화폐'];
+  
+  keywords.forEach(keyword => {
+    if (memeKeywords.some(mk => keyword.toLowerCase().includes(mk.toLowerCase()))) {
+      score += 25;
+    }
+    if (techKeywords.some(tk => keyword.toLowerCase().includes(tk.toLowerCase()))) {
+      score += 15;
+    }
+    if (volatileKeywords.some(vk => keyword.toLowerCase().includes(vk.toLowerCase()))) {
+      score += 20;
+    }
+  });
+
+  // 동전주면 밈 점수 보너스
+  const price = stock.currency === 'USD' ? 
+    (Math.random() * 15 + 0.5) : 
+    (Math.random() * 15000 + 500);
+  const isPennyStock = stock.currency === 'USD' ? price <= 5 : price <= 1000;
+  if (isPennyStock) score += 15;
+  
+  // UAVS 특별 처리
+  if (stock.symbol === 'UAVS') score += 30;
+
+  return Math.min(100, score + Math.random() * 20 - 10);
+};
+
+const calculateQuantScore = () => {
+  const per = Math.random() * 30 + 5;
+  const pbr = Math.random() * 5 + 0.5;
+  const roe = Math.random() * 25 + (-10);
+  const debtRatio = Math.random() * 80 + 10;
+  const revenueGrowth = Math.random() * 50 + (-20);
+
+  let score = 0;
+  score += per < 15 ? 20 : per < 25 ? 10 : 0;
+  score += pbr < 1.5 ? 20 : pbr < 3 ? 10 : 0;
+  score += roe > 10 ? 20 : roe > 5 ? 10 : roe > 0 ? 5 : 0;
+  score += debtRatio < 30 ? 20 : debtRatio < 50 ? 10 : 0;
+  score += revenueGrowth > 15 ? 20 : revenueGrowth > 5 ? 10 : revenueGrowth > 0 ? 5 : 0;
+
+  return { score: Math.min(100, score), per, pbr, roe, debtRatio, revenueGrowth };
+};
 
 const StockDiscoveryEngine = ({ darkMode = false, keywords = [], onStockTrack }) => {
   const [filterOptions, setFilterOptions] = useLocalStorage('discovery_filters', {
     showPennyStocks: true,
     showMemeStocks: true,
     showQuantStocks: true,
-    maxPrice: 10, // 동전주 기준 (USD)
+    maxPrice: 10,
     minMemeScore: 60,
     minQuantScore: 70,
-    maxMarketCap: 1000000000 // 10억 달러
+    maxMarketCap: 1000000000
   });
   
-  const [sortBy, setSortBy] = useState('memeScore'); // memeScore, quantScore, price, marketCap
+  const [sortBy, setSortBy] = useState('memeScore');
   const [customFilters, setCustomFilters] = useLocalStorage('custom_filters', []);
   const [showCustomFilterForm, setShowCustomFilterForm] = useState(false);
   const [newFilterName, setNewFilterName] = useState('');
 
-  const theme = {
-    bg: darkMode ? '#1a1a1a' : '#ffffff',
-    cardBg: darkMode ? '#2d2d2d' : '#f8f9fa',
-    text: darkMode ? '#ffffff' : '#333333',
-    subtext: darkMode ? '#cccccc' : '#666666',
-    border: darkMode ? '#404040' : '#e0e0e0',
-    accent: '#007bff',
-    positive: '#00c851',
-    negative: '#ff4444',
-    warning: '#ffbb33',
-    purple: '#9c27b0',
-    teal: '#20c997',
-    orange: '#ff6b35'
-  };
+  const theme = useTheme(darkMode);
 
   // 키워드 기반 종목 매칭 및 분석
   const discoveredStocks = useMemo(() => {
@@ -52,81 +91,37 @@ const StockDiscoveryEngine = ({ darkMode = false, keywords = [], onStockTrack })
       return acc;
     }, []);
 
-    // 각 종목에 대해 동전주/밈주식/퀀트 점수 계산
+    // 각 종목에 대해 동전주/밈주식/퀀트 점수 계산 (최적화)
     return uniqueStocks.map(stock => {
-      // 동전주 여부 (간단한 시뮬레이션)
       const basePrice = stock.currency === 'USD' ? 
-        (Math.random() * 15 + 0.5) : // USD 0.5~15.5
-        (Math.random() * 15000 + 500); // KRW 500~15500
+        (Math.random() * 15 + 0.5) : 
+        (Math.random() * 15000 + 500);
       
       const isPennyStock = stock.currency === 'USD' ? basePrice <= 5 : basePrice <= 1000;
-
-      // 밈주식 점수 계산 (키워드 기반 시뮬레이션)
-      let memeScore = 30; // 기본 점수
       
-      // 키워드 기반 밈 점수 증가
-      const memeKeywords = ['밈', 'meme', '레딧', 'reddit', '소셜', 'YOLO', '개미', '급등'];
-      const techKeywords = ['AI', '드론', '전기차', '게임', '우주', '항공'];
-      const volatileKeywords = ['우크라이나', '국방', '에너지', '암호화폐'];
-      
-      keywords.forEach(keyword => {
-        if (memeKeywords.some(mk => keyword.toLowerCase().includes(mk.toLowerCase()))) {
-          memeScore += 25;
-        }
-        if (techKeywords.some(tk => keyword.toLowerCase().includes(tk.toLowerCase()))) {
-          memeScore += 15;
-        }
-        if (volatileKeywords.some(vk => keyword.toLowerCase().includes(vk.toLowerCase()))) {
-          memeScore += 20;
-        }
-      });
-
-      // 동전주면 밈 점수 보너스
-      if (isPennyStock) memeScore += 15;
-      
-      // UAVS 특별 처리
-      if (stock.symbol === 'UAVS') memeScore += 30;
-
-      memeScore = Math.min(100, memeScore + Math.random() * 20 - 10);
-
-      // 퀀트 점수 계산 (시뮬레이션)
-      const per = Math.random() * 30 + 5; // 5~35
-      const pbr = Math.random() * 5 + 0.5; // 0.5~5.5
-      const roe = Math.random() * 25 + (-10); // -10%~15%
-      const debtRatio = Math.random() * 80 + 10; // 10%~90%
-      const revenueGrowth = Math.random() * 50 + (-20); // -20%~30%
-
-      // 퀀트 점수 = (낮은 PER + 낮은 PBR + 높은 ROE + 낮은 부채비율 + 높은 성장률)
-      let quantScore = 0;
-      quantScore += per < 15 ? 20 : per < 25 ? 10 : 0; // PER 점수
-      quantScore += pbr < 1.5 ? 20 : pbr < 3 ? 10 : 0; // PBR 점수
-      quantScore += roe > 10 ? 20 : roe > 5 ? 10 : roe > 0 ? 5 : 0; // ROE 점수
-      quantScore += debtRatio < 30 ? 20 : debtRatio < 50 ? 10 : 0; // 부채비율 점수
-      quantScore += revenueGrowth > 15 ? 20 : revenueGrowth > 5 ? 10 : revenueGrowth > 0 ? 5 : 0; // 성장률 점수
-
-      quantScore = Math.min(100, quantScore);
-
-      // 가상 시가총액 (백만 달러)
-      const marketCap = Math.random() * 5000 + 50; // 50M~5B USD
+      // 분리된 함수들로 점수 계산
+      const memeScore = Math.round(calculateMemeScore(stock, keywords));
+      const quantData = calculateQuantScore();
+      const marketCap = Math.random() * 5000 + 50;
 
       return {
         ...stock,
         price: basePrice,
         isPennyStock,
-        memeScore: Math.round(memeScore),
-        quantScore: Math.round(quantScore),
+        memeScore,
+        quantScore: Math.round(quantData.score),
         marketCap,
         
         // 퀀트 지표들
-        per,
-        pbr,
-        roe,
-        debtRatio,
-        revenueGrowth,
+        per: quantData.per,
+        pbr: quantData.pbr,
+        roe: quantData.roe,
+        debtRatio: quantData.debtRatio,
+        revenueGrowth: quantData.revenueGrowth,
         
         // 밈 지표들
         socialMentions: Math.floor(Math.random() * 10000),
-        volumeSpike: Math.random() * 500 + 100, // % 증가
+        volumeSpike: Math.random() * 500 + 100,
         redditScore: Math.floor(Math.random() * 100),
         
         // 키워드 매칭 점수
@@ -242,7 +237,7 @@ const StockDiscoveryEngine = ({ darkMode = false, keywords = [], onStockTrack })
     }}>
       {/* 헤더 */}
       <div style={{
-        background: `linear-gradient(135deg, ${theme.teal}, ${theme.accent})`,
+        background: theme.gradients.ocean,
         padding: '20px',
         color: 'white'
       }}>
@@ -503,261 +498,12 @@ const StockDiscoveryEngine = ({ darkMode = false, keywords = [], onStockTrack })
           </div>
         </div>
 
-        {/* 발굴된 종목 목록 */}
-        {filteredStocks.length === 0 ? (
-          <div style={{
-            textAlign: 'center',
-            padding: '60px 20px',
-            color: theme.subtext,
-            fontSize: '16px'
-          }}>
-            <div style={{ fontSize: '48px', marginBottom: '20px' }}>🔍</div>
-            <div>필터 조건에 맞는 종목이 없습니다.</div>
-            <div style={{ fontSize: '14px', marginTop: '8px' }}>
-              필터 조건을 조정하거나 다른 키워드를 시도해보세요.
-            </div>
-          </div>
-        ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-            {filteredStocks.map(stock => (
-              <div
-                key={stock.symbol}
-                style={{
-                  background: theme.cardBg,
-                  border: `2px solid ${
-                    stock.symbol === 'UAVS' ? theme.warning :
-                    stock.isPennyStock ? theme.positive :
-                    stock.memeScore >= 80 ? theme.orange :
-                    theme.border
-                  }`,
-                  borderRadius: '12px',
-                  padding: '20px',
-                  position: 'relative'
-                }}
-              >
-                {/* 종목 헤더 */}
-                <div style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'flex-start',
-                  marginBottom: '15px'
-                }}>
-                  <div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '5px' }}>
-                      <span style={{ color: theme.text, fontWeight: '700', fontSize: '18px' }}>
-                        {stock.symbol}
-                        {stock.symbol === 'UAVS' && ' 🎯🚁'}
-                        {stock.isPennyStock && ' 🪙'}
-                      </span>
-                      <span style={{ color: theme.subtext, fontSize: '14px' }}>
-                        {stock.name}
-                      </span>
-                    </div>
-                    <div style={{ color: theme.subtext, fontSize: '12px' }}>
-                      {stock.market} • {stock.sector} • 
-                      키워드 매칭: {stock.keywordMatchScore}개
-                    </div>
-                  </div>
-
-                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                    <div style={{ textAlign: 'right' }}>
-                      <div style={{ color: theme.text, fontSize: '18px', fontWeight: '700' }}>
-                        {stock.currency === 'USD' ? '$' : ''}{stock.price.toFixed(2)}
-                        {stock.currency === 'KRW' ? '원' : ''}
-                      </div>
-                      <div style={{ color: theme.subtext, fontSize: '11px' }}>
-                        시총: {stock.marketCap < 1000 ? 
-                          `${stock.marketCap.toFixed(0)}M` : 
-                          `${(stock.marketCap/1000).toFixed(1)}B`}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* 점수 표시 */}
-                <div style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))',
-                  gap: '10px',
-                  marginBottom: '15px'
-                }}>
-                  {/* 밈 점수 */}
-                  <div style={{
-                    background: theme.bg,
-                    padding: '10px',
-                    borderRadius: '8px',
-                    textAlign: 'center',
-                    border: `2px solid ${
-                      stock.memeScore >= 80 ? theme.positive :
-                      stock.memeScore >= 60 ? theme.warning :
-                      theme.border
-                    }`
-                  }}>
-                    <div style={{ fontSize: '12px', color: theme.subtext, marginBottom: '2px' }}>밈 점수</div>
-                    <div style={{ 
-                      fontSize: '18px', 
-                      fontWeight: '700',
-                      color: stock.memeScore >= 80 ? theme.positive :
-                             stock.memeScore >= 60 ? theme.warning : theme.text
-                    }}>
-                      {stock.memeScore}
-                    </div>
-                  </div>
-
-                  {/* 퀀트 점수 */}
-                  <div style={{
-                    background: theme.bg,
-                    padding: '10px',
-                    borderRadius: '8px',
-                    textAlign: 'center',
-                    border: `2px solid ${
-                      stock.quantScore >= 80 ? theme.positive :
-                      stock.quantScore >= 60 ? theme.warning :
-                      theme.border
-                    }`
-                  }}>
-                    <div style={{ fontSize: '12px', color: theme.subtext, marginBottom: '2px' }}>퀀트 점수</div>
-                    <div style={{ 
-                      fontSize: '18px', 
-                      fontWeight: '700',
-                      color: stock.quantScore >= 80 ? theme.positive :
-                             stock.quantScore >= 60 ? theme.warning : theme.text
-                    }}>
-                      {stock.quantScore}
-                    </div>
-                  </div>
-
-                  {/* 동전주 여부 */}
-                  <div style={{
-                    background: theme.bg,
-                    padding: '10px',
-                    borderRadius: '8px',
-                    textAlign: 'center',
-                    border: `2px solid ${stock.isPennyStock ? theme.positive : theme.border}`
-                  }}>
-                    <div style={{ fontSize: '12px', color: theme.subtext, marginBottom: '2px' }}>동전주</div>
-                    <div style={{ 
-                      fontSize: '18px',
-                      color: stock.isPennyStock ? theme.positive : theme.text
-                    }}>
-                      {stock.isPennyStock ? '✅' : '❌'}
-                    </div>
-                  </div>
-
-                  {/* 거래량 급증 */}
-                  <div style={{
-                    background: theme.bg,
-                    padding: '10px',
-                    borderRadius: '8px',
-                    textAlign: 'center'
-                  }}>
-                    <div style={{ fontSize: '12px', color: theme.subtext, marginBottom: '2px' }}>거래량</div>
-                    <div style={{ 
-                      fontSize: '14px', 
-                      fontWeight: '600',
-                      color: stock.volumeSpike > 200 ? theme.positive : theme.text
-                    }}>
-                      +{stock.volumeSpike.toFixed(0)}%
-                    </div>
-                  </div>
-                </div>
-
-                {/* 상세 지표 */}
-                <div style={{
-                  background: theme.bg,
-                  padding: '12px',
-                  borderRadius: '8px',
-                  marginBottom: '15px',
-                  fontSize: '12px'
-                }}>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))', gap: '8px' }}>
-                    <div>
-                      <span style={{ color: theme.subtext }}>PER: </span>
-                      <span style={{ color: theme.text, fontWeight: '600' }}>{stock.per.toFixed(1)}</span>
-                    </div>
-                    <div>
-                      <span style={{ color: theme.subtext }}>PBR: </span>
-                      <span style={{ color: theme.text, fontWeight: '600' }}>{stock.pbr.toFixed(1)}</span>
-                    </div>
-                    <div>
-                      <span style={{ color: theme.subtext }}>ROE: </span>
-                      <span style={{ 
-                        color: stock.roe > 0 ? theme.positive : theme.negative,
-                        fontWeight: '600'
-                      }}>
-                        {stock.roe.toFixed(1)}%
-                      </span>
-                    </div>
-                    <div>
-                      <span style={{ color: theme.subtext }}>부채비율: </span>
-                      <span style={{ color: theme.text, fontWeight: '600' }}>{stock.debtRatio.toFixed(1)}%</span>
-                    </div>
-                    <div>
-                      <span style={{ color: theme.subtext }}>성장률: </span>
-                      <span style={{ 
-                        color: stock.revenueGrowth > 0 ? theme.positive : theme.negative,
-                        fontWeight: '600'
-                      }}>
-                        {stock.revenueGrowth.toFixed(1)}%
-                      </span>
-                    </div>
-                    <div>
-                      <span style={{ color: theme.subtext }}>소셜: </span>
-                      <span style={{ color: theme.text, fontWeight: '600' }}>{stock.socialMentions.toLocaleString()}</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* 액션 버튼들 */}
-                <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-                  <button
-                    onClick={() => handleTrackStock(stock)}
-                    style={{
-                      background: theme.positive,
-                      border: 'none',
-                      color: 'white',
-                      padding: '8px 16px',
-                      borderRadius: '6px',
-                      cursor: 'pointer',
-                      fontSize: '14px',
-                      fontWeight: '600'
-                    }}
-                  >
-                    📈 추적 시작
-                  </button>
-                  <button
-                    style={{
-                      background: theme.accent,
-                      border: 'none',
-                      color: 'white',
-                      padding: '8px 16px',
-                      borderRadius: '6px',
-                      cursor: 'pointer',
-                      fontSize: '14px',
-                      fontWeight: '600'
-                    }}
-                  >
-                    📰 뉴스 수집
-                  </button>
-                  <button
-                    style={{
-                      background: theme.warning,
-                      border: 'none',
-                      color: 'white',
-                      padding: '8px 16px',
-                      borderRadius: '6px',
-                      cursor: 'pointer',
-                      fontSize: '14px',
-                      fontWeight: '600'
-                    }}
-                  >
-                    💭 매수 이유 등록
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
+        {/* 발굴된 종목 목록 - 가상 스크롤링 적용 */}
+        <VirtualizedStockList
+          stocks={filteredStocks}
+          onStockTrack={handleTrackStock}
+          darkMode={darkMode}
+        />
 
         {/* CSV 내보내기 */}
         {filteredStocks.length > 0 && (

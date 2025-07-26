@@ -4,9 +4,7 @@ import { getStockBySymbol } from '../data/stockMasterDB';
 
 const EmotionalTradingTracker = ({ darkMode = false, selectedStock }) => {
   const [tradingRecords, setTradingRecords] = useLocalStorage('trading_records', []);
-  const [emotionalData, setEmotionalData] = useLocalStorage('emotional_data', []);
   const [showRecordForm, setShowRecordForm] = useState(false);
-  const [currentRecord, setCurrentRecord] = useState(null);
   const [filterBy, setFilterBy] = useState('all'); // all, starred, recent
 
   // 새 기록 폼 상태
@@ -84,7 +82,7 @@ const EmotionalTradingTracker = ({ darkMode = false, selectedStock }) => {
         symbol: selectedStock
       }));
     }
-  }, [selectedStock]);
+  }, [selectedStock, formData.symbol]);
 
   // 기록 저장
   const saveRecord = useCallback(() => {
@@ -161,13 +159,13 @@ const EmotionalTradingTracker = ({ darkMode = false, selectedStock }) => {
   });
 
   // 유사한 과거 기록 찾기
-  const findSimilarRecords = useCallback((currentEmotion, currentAction) => {
+  const findSimilarRecords = useCallback((currentEmotion, currentAction, excludeId = null) => {
     return tradingRecords.filter(record =>
       record.emotion === currentEmotion &&
       record.action === currentAction &&
-      record.id !== currentRecord?.id
+      record.id !== excludeId
     ).slice(0, 3);
-  }, [tradingRecords, currentRecord]);
+  }, [tradingRecords]);
 
   return (
     <div style={{
