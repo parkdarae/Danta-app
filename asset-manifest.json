@@ -1,13 +1,13 @@
 {
   "files": {
     "main.css": "/Danta-app/static/css/main.9f3a265a.css",
-    "main.js": "/Danta-app/static/js/main.0143cff2.js",
+    "main.js": "/Danta-app/static/js/main.b771e5d6.js",
     "index.html": "/Danta-app/index.html",
     "main.9f3a265a.css.map": "/Danta-app/static/css/main.9f3a265a.css.map",
-    "main.0143cff2.js.map": "/Danta-app/static/js/main.0143cff2.js.map"
+    "main.b771e5d6.js.map": "/Danta-app/static/js/main.b771e5d6.js.map"
   },
   "entrypoints": [
     "static/css/main.9f3a265a.css",
-    "static/js/main.0143cff2.js"
+    "static/js/main.b771e5d6.js"
   ]
 }
