@@ -135,7 +135,8 @@ const AIStockMentor = ({
   userLevel = 'beginner',
   keywords = [],
   selectedStock = null,
-  isFirstVisit = false 
+  isFirstVisit = false,
+  userProfile = {}
 }) => {
   const theme = useTheme(darkMode);
   const typography = useTypography(darkMode);
@@ -148,6 +149,20 @@ const AIStockMentor = ({
     emotional: 0,
     overall: 0
   });
+
+  // 사용자 이름 가져오기 함수
+  const getUserDisplayName = () => {
+    const { name, nickname } = userProfile;
+    if (!name && !nickname) return '';
+    if (name && !nickname) return name + '님';
+    if (!name && nickname) return nickname;
+    
+    // 상황에 맞게 혼용
+    const useNickname = Math.random() > 0.5;
+    return useNickname ? nickname : name + '님';
+  };
+
+  const displayName = getUserDisplayName();
 
   // 멘토 성격별 스타일
   const mentorStyles = {
@@ -175,9 +190,13 @@ const AIStockMentor = ({
 
   // 상황별 조언 선택 로직
   const getContextualAdvice = useCallback(() => {
-    // 첫 방문자 가이드
+    // 첫 방문자 가이드 (개인화)
     if (isFirstVisit) {
-      return CONTEXTUAL_GUIDES.firstVisit;
+      return {
+        ...CONTEXTUAL_GUIDES.firstVisit,
+        title: displayName ? `🎉 ${displayName}, 투자의 세계에 오신 것을 환영합니다!` : CONTEXTUAL_GUIDES.firstVisit.title,
+        content: displayName ? `안녕하세요, ${displayName}! 저는 25년 경력의 주식 전문가입니다. 여러분의 투자 여정을 도와드릴게요.` : CONTEXTUAL_GUIDES.firstVisit.content
+      };
     }
 
     // 키워드가 비어있을 때
@@ -192,17 +211,37 @@ const AIStockMentor = ({
       return CONTEXTUAL_GUIDES.memeStockWarning;
     }
 
-    // 섹션별 조언
+    // 섹션별 조언 (개인화)
     const sectionAdvice = MENTOR_ADVICE[currentSection];
     if (sectionAdvice && sectionAdvice[userLevel]) {
       const adviceList = sectionAdvice[userLevel];
-      return adviceList[Math.floor(Math.random() * adviceList.length)];
+      const selectedAdvice = adviceList[Math.floor(Math.random() * adviceList.length)];
+      
+      // 개인화된 조언 반환
+      if (displayName && selectedAdvice.content) {
+        return {
+          ...selectedAdvice,
+          content: selectedAdvice.content.replace(/좋아요!/g, `${displayName}! 좋아요!`)
+                                       .replace(/정말 훌륭해요!/g, `${displayName}! 정말 훌륭해요!`)
+                                       .replace(/괜찮아요!/g, `${displayName}! 괜찮아요!`)
+        };
+      }
+      return selectedAdvice;
     }
 
-    // 일반적인 조언
+    // 일반적인 조언 (개인화)
     const generalAdvice = MENTOR_ADVICE.general;
-    return generalAdvice[Math.floor(Math.random() * generalAdvice.length)];
-  }, [currentSection, userLevel, keywords, isFirstVisit]);
+    const selectedGeneral = generalAdvice[Math.floor(Math.random() * generalAdvice.length)];
+    
+    if (displayName) {
+      return {
+        ...selectedGeneral,
+        content: displayName + '! ' + selectedGeneral.content
+      };
+    }
+    
+    return selectedGeneral;
+  }, [currentSection, userLevel, keywords, isFirstVisit, displayName]);
 
   // 조언 업데이트
   useEffect(() => {

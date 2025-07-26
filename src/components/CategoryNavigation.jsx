@@ -12,6 +12,12 @@ const CategoryNavigation = ({ currentCategory, onCategoryChange, darkMode = fals
 
   const categories = [
     {
+      id: 'user',
+      name: '👤 내 프로필',
+      description: '개인설정, 투자성향, 맞춤추천',
+      icon: '🏠'
+    },
+    {
       id: 'trading',
       name: '📈 트레이딩',
       description: '차트, 종목선택, 매매기록',

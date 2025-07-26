@@ -29,6 +29,7 @@ import StockAlertSystem from '../components/StockAlertSystem';
 import EmotionalTradingTracker from '../components/EmotionalTradingTracker';
 import MetaCognitionReport from '../components/MetaCognitionReport';
 import KeywordToStockWorkflow from '../components/KeywordToStockWorkflow';
+import UserPage from '../components/UserPage';
 import AIStockMentor from '../components/AIStockMentor';
 import InteractiveGuide from '../components/InteractiveGuide';
 import { useChaessaemNotification, ChaessaemNotificationContainer } from '../components/ChaessaemNotification';
@@ -43,7 +44,7 @@ function MainPage() {
   const [history, setHistory] = useState([]);
   const [darkMode, setDarkMode] = useLocalStorage(STORAGE_KEYS.DARK_MODE, false);
   const [miningResults, setMiningResults] = useState(null);
-  const [currentCategory, setCurrentCategory] = useLocalStorage('current_category', 'trading');
+  const [currentCategory, setCurrentCategory] = useLocalStorage('current_category', 'user');
   const [userWatchlist, setUserWatchlist] = useState(['UAVS', 'AAPL', 'TSLA', 'NVDA', 'MSFT', 'GOOGL', 'META']);
   const [userPortfolio, setUserPortfolio] = useState([]);
   const [isFirstVisit, setIsFirstVisit] = useLocalStorage('is_first_visit', true);
@@ -88,6 +89,12 @@ function MainPage() {
     const accent = '#8884d8';
     
     switch (currentCategory) {
+      case 'user':
+        return (
+          <>
+            <UserPage darkMode={darkMode} />
+          </>
+        );
       case 'trading':
         return (
           <>
@@ -394,6 +401,7 @@ function MainPage() {
         }}>
           📂 {(() => {
             switch(currentCategory) {
+              case 'user': return '👤 내 프로필';
               case 'trading': return '📈 트레이딩 도구';
               case 'analysis': return '🔍 분석 도구';
               case 'news': return '📰 뉴스 정보';
@@ -426,6 +434,7 @@ function MainPage() {
         keywords={generatedKeywords}
         selectedStock={selectedStock}
         isFirstVisit={isFirstVisit}
+        userProfile={JSON.parse(localStorage.getItem('user_profile') || '{}')}
         data-guide="ai-mentor"
       />
       
