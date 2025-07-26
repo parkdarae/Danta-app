@@ -24,6 +24,9 @@ import DataMiningFramework from '../components/DataMiningFramework';
 import AutoReportGenerator from '../components/AutoReportGenerator';
 import PerformanceMonitor from '../components/PerformanceMonitor';
 import SimpleTOSTable from '../components/SimpleTOSTable';
+import WatchlistManager from '../components/WatchlistManager';
+import PortfolioOCR from '../components/PortfolioOCR';
+import EnhancedNewsAnalyzer from '../components/EnhancedNewsAnalyzer';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { STORAGE_KEYS, STOCKS } from '../utils/constants';
 
@@ -35,10 +38,22 @@ function MainPage() {
   const [darkMode, setDarkMode] = useLocalStorage(STORAGE_KEYS.DARK_MODE, false);
   const [miningResults, setMiningResults] = useState(null);
   const [currentCategory, setCurrentCategory] = useLocalStorage('current_category', 'trading');
+  const [userWatchlist, setUserWatchlist] = useState(['ACEL', 'EAGLE', 'AEGL', 'AAPL', 'TSLA', 'NVDA', 'MSFT']);
+  const [userPortfolio, setUserPortfolio] = useState([]);
 
   const toggleDarkMode = useCallback(() => {
     setDarkMode(dm => !dm);
   }, [setDarkMode]);
+
+  // 관심종목 변경 콜백
+  const handleWatchlistChange = useCallback((newWatchlist) => {
+    setUserWatchlist(newWatchlist);
+  }, []);
+
+  // 포트폴리오 변경 콜백
+  const handlePortfolioUpdate = useCallback((newPortfolio) => {
+    setUserPortfolio(newPortfolio);
+  }, []);
 
   // 카테고리별 컴포넌트 렌더링 함수
   const renderCategoryComponents = () => {
@@ -56,8 +71,13 @@ function MainPage() {
               darkMode={darkMode}
               selectedStock={selectedStock}
             />
+            <WatchlistManager 
+              darkMode={darkMode}
+              onWatchlistChange={handleWatchlistChange}
+            />
             <SimpleTOSTable 
               darkMode={darkMode}
+              watchlist={userWatchlist}
             />
             <div style={{ textAlign: 'center', marginBottom: 8, display: 'flex', justifyContent: 'center', gap: 8 }}>
               <button
@@ -134,6 +154,10 @@ function MainPage() {
       case 'news':
         return (
           <>
+            <EnhancedNewsAnalyzer 
+              darkMode={darkMode} 
+              selectedStock={selectedStock}
+            />
             <RealtimeNewsSection stock={selectedStock} darkMode={darkMode} />
             <RealtimeFetchDemo darkMode={darkMode} />
           </>
@@ -142,6 +166,10 @@ function MainPage() {
       case 'portfolio':
         return (
           <>
+            <PortfolioOCR 
+              darkMode={darkMode}
+              onPortfolioUpdate={handlePortfolioUpdate}
+            />
             <MyPurchaseList darkMode={darkMode} />
             <InvestmentMemo darkMode={darkMode} />
             <div style={{

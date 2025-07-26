@@ -1,13 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import freeUSStockAPI from '../services/freeUSStockAPI';
 
-const SimpleTOSTable = ({ darkMode = false }) => {
+const SimpleTOSTable = ({ darkMode = false, watchlist = ['ACEL', 'EAGLE', 'AEGL', 'AAPL', 'TSLA', 'NVDA', 'MSFT'] }) => {
   const [stockData, setStockData] = useState({});
   const [loading, setLoading] = useState(true);
   const [lastUpdate, setLastUpdate] = useState(new Date());
-
-  // 에이지이글에어리얼사 관련 워치리스트
-  const watchlist = ['ACEL', 'EAGLE', 'AEGL', 'AAPL', 'TSLA', 'NVDA', 'MSFT'];
+  const [selectedStocks, setSelectedStocks] = useState(new Set());
 
   const theme = {
     bg: darkMode ? '#1a1a1a' : '#ffffff',
@@ -46,7 +44,7 @@ const SimpleTOSTable = ({ darkMode = false }) => {
     const interval = setInterval(fetchData, 5000); // 5초마다 업데이트
 
     return () => clearInterval(interval);
-  }, []);
+  }, [watchlist]);
 
   const formatNumber = (num, decimals = 2) => {
     if (num === null || num === undefined) return 'N/A';
@@ -154,8 +152,39 @@ const SimpleTOSTable = ({ darkMode = false }) => {
                   onMouseLeave={(e) => e.target.parentElement.style.background = 'transparent'}
                 >
                   <td style={{ padding: '12px' }}>
-                    <div style={{ color: '#007bff', fontWeight: '600', fontSize: '14px' }}>
-                      {stock.symbol}
+                    <div style={{ 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      gap: '8px',
+                      cursor: 'pointer'
+                    }}
+                    onClick={() => {
+                      const newSelected = new Set(selectedStocks);
+                      if (newSelected.has(stock.symbol)) {
+                        newSelected.delete(stock.symbol);
+                      } else {
+                        newSelected.add(stock.symbol);
+                      }
+                      setSelectedStocks(newSelected);
+                    }}>
+                      <input
+                        type="checkbox"
+                        checked={selectedStocks.has(stock.symbol)}
+                        onChange={() => {}}
+                        style={{ marginRight: '4px' }}
+                      />
+                      <div style={{ 
+                        color: '#007bff', 
+                        fontWeight: '600', 
+                        fontSize: '16px',
+                        background: selectedStocks.has(stock.symbol) ? theme.accent + '20' : 'transparent',
+                        padding: '4px 8px',
+                        borderRadius: '6px',
+                        border: `2px solid ${selectedStocks.has(stock.symbol) ? theme.accent : 'transparent'}`
+                      }}>
+                        {stock.symbol}
+                        {stock.symbol.includes('EAGLE') || stock.symbol === 'ACEL' || stock.symbol === 'AEGL' ? ' 🎯' : ''}
+                      </div>
                     </div>
                   </td>
                   <td style={{ padding: '12px' }}>
@@ -223,9 +252,20 @@ const SimpleTOSTable = ({ darkMode = false }) => {
       }}>
         <div>
           💡 <strong>에이지이글에어리얼사</strong> 관련 미국 주식 포함
+          {selectedStocks.size > 0 && (
+            <span style={{ 
+              marginLeft: '10px', 
+              background: theme.accent, 
+              color: 'white', 
+              padding: '2px 6px', 
+              borderRadius: '8px' 
+            }}>
+              {selectedStocks.size}개 선택됨
+            </span>
+          )}
         </div>
         <div>
-          🔄 5초마다 자동 업데이트
+          🔄 5초마다 자동 업데이트 • 📊 실시간 TOS 스타일
         </div>
       </div>
     </div>
