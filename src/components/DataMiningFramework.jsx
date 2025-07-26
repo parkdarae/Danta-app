@@ -7,6 +7,7 @@ import { usePerformanceOptimization, useAsyncOptimization, useMemoryMonitoring }
 import { useAnalysisWorker } from '../hooks/useWebWorker';
 import ProgressIndicator from './ProgressIndicator';
 import AnalysisResultsVisualizer from './AnalysisResultsVisualizer';
+import { ChaessaemLoader } from './ChaessaemEmoji';
 
 // 분석 단계 정의
 const ANALYSIS_PHASES = {
@@ -827,16 +828,27 @@ function DataMiningFramework({ selectedStock, darkMode = false, onAnalysisComple
         </div>
       )}
 
-      {/* 진행 상황 - 새로운 ProgressIndicator 사용 */}
+      {/* 진행 상황 - 채쌤 로더와 ProgressIndicator */}
       {(analysisState.isRunning || currentAnalysis) && (
-        <ProgressIndicator
-          progress={currentAnalysis?.progress || analysisState.progress}
-          phase={currentAnalysis?.phase || analysisState.currentPhase}
-          isActive={analysisState.isRunning || hasActiveJobs}
-          darkMode={darkMode}
-          memoryUsage={analysisState.memoryUsage}
-          estimatedTime={currentAnalysis?.estimatedTime}
-        />
+        <div style={{ marginBottom: '20px' }}>
+          {/* 채쌤 로딩 애니메이션 */}
+          <ChaessaemLoader
+            type="working"
+            darkMode={darkMode}
+            showTips={true}
+            message="데이터를 열심히 분석하고 있어요!"
+          />
+          
+          {/* 기술적 진행 상황 */}
+          <ProgressIndicator
+            progress={currentAnalysis?.progress || analysisState.progress}
+            phase={currentAnalysis?.phase || analysisState.currentPhase}
+            isActive={analysisState.isRunning || hasActiveJobs}
+            darkMode={darkMode}
+            memoryUsage={analysisState.memoryUsage}
+            estimatedTime={currentAnalysis?.estimatedTime}
+          />
+        </div>
       )}
 
       {/* 오류 표시 */}

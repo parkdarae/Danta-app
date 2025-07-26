@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import ChaessaemEmoji from './ChaessaemEmoji';
 
 // 기술 지표 데이터
 const technicalIndicators = {
@@ -147,18 +148,28 @@ function TutorialHelper({ darkMode = false, onClose }) {
         alignItems: 'center',
         marginBottom: '1.5rem'
       }}>
-        <h3 style={{
-          margin: 0,
-          color: accent,
-          fontSize: '1.4rem',
-          fontWeight: '800',
-          background: `linear-gradient(45deg, ${accent}, #ff6b6b)`,
-          backgroundClip: 'text',
-          WebkitBackgroundClip: 'text',
-          WebkitTextFillColor: 'transparent'
-        }}>
-          🎓 주식 초보자 가이드
-        </h3>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <ChaessaemEmoji
+            type="emotions"
+            emotion="confident"
+            size="normal"
+            showMessage={false}
+            autoAnimation={true}
+            darkMode={darkMode}
+          />
+          <h3 style={{
+            margin: 0,
+            color: accent,
+            fontSize: '1.4rem',
+            fontWeight: '800',
+            background: `linear-gradient(45deg, ${accent}, #ff6b6b)`,
+            backgroundClip: 'text',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent'
+          }}>
+            채쌤의 주식 초보자 가이드
+          </h3>
+        </div>
         <button
           onClick={() => setTutorialMode(false)}
           style={{

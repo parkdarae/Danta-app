@@ -1,4 +1,5 @@
 import React from 'react';
+import ChaessaemEmoji from './ChaessaemEmoji';
 
 const reactions = {
   // 기존 32개 감정
@@ -119,14 +120,26 @@ function CharacterReaction({ emotion, darkMode = false }) {
         animation: 'float 3s ease-in-out infinite reverse'
       }} />
 
-      {/* 메인 캐릭터 */}
+      {/* 메인 캐릭터 - 채쌤 */}
       <div style={{
-        fontSize: '4rem',
         marginBottom: '1.5rem',
         animation: 'bounce 2s infinite',
         filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.1))'
       }}>
-        {reaction.emoji}
+        <ChaessaemEmoji
+          type="emotions"
+          emotion={emotion === 'excited' ? 'excited' :
+                   emotion === 'happy' ? 'happy' :
+                   emotion === 'confident' ? 'confident' :
+                   emotion === 'worried' ? 'worried' :
+                   emotion === 'surprised' ? 'surprised' :
+                   emotion === 'greed' ? 'love' :
+                   emotion === 'fear' ? 'worried' : 'thinking'}
+          size="huge"
+          showMessage={true}
+          autoAnimation={true}
+          darkMode={darkMode}
+        />
       </div>
 
       {/* 말풍선 */}

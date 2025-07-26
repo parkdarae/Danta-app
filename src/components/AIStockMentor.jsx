@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useTheme } from '../hooks/useTheme';
 import { useTypography } from '../hooks/useTypography';
 import { useLocalStorage } from '../hooks/useLocalStorage';
+import ChaessaemEmoji from './ChaessaemEmoji';
 
 // 멘토의 조언 데이터베이스
 const MENTOR_ADVICE = {
@@ -250,14 +251,20 @@ const AIStockMentor = ({
         alignItems: 'center'
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <div style={{ fontSize: '32px' }}>{currentMentor.avatar}</div>
+          <ChaessaemEmoji
+            type="emotions"
+            emotion={currentSection === 'discovery' ? 'excited' : 'confident'}
+            size="normal"
+            showMessage={false}
+            darkMode={false}
+          />
           <div>
             <div style={{ 
               ...typography.presets.body.small,
               fontWeight: typography.fontWeight.bold,
               marginBottom: '2px'
             }}>
-              AI 투자 멘토
+              채쌤 AI 투자 멘토
             </div>
             <div style={{ 
               ...typography.presets.caption,

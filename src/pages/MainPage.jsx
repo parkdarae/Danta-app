@@ -31,6 +31,7 @@ import MetaCognitionReport from '../components/MetaCognitionReport';
 import KeywordToStockWorkflow from '../components/KeywordToStockWorkflow';
 import AIStockMentor from '../components/AIStockMentor';
 import InteractiveGuide from '../components/InteractiveGuide';
+import { useChaessaemNotification, ChaessaemNotificationContainer } from '../components/ChaessaemNotification';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { useTypography } from '../hooks/useTypography';
 import { STORAGE_KEYS, STOCKS } from '../utils/constants';
@@ -50,10 +51,27 @@ function MainPage() {
   const [generatedKeywords, setGeneratedKeywords] = useState([]);
   
   const typography = useTypography(darkMode);
+  const notification = useChaessaemNotification();
 
   const toggleDarkMode = useCallback(() => {
     setDarkMode(dm => !dm);
   }, [setDarkMode]);
+
+  // 첫 방문 시 웰컴 메시지
+  useEffect(() => {
+    if (isFirstVisit) {
+      setTimeout(() => {
+        notification.success(
+          '채쌤과 함께하는 스마트 투자 여정에 오신 것을 환영합니다! 🎉',
+          {
+            title: '환영합니다!',
+            duration: 8000,
+            position: 'center'
+          }
+        );
+      }, 2000);
+    }
+  }, [isFirstVisit, notification]);
 
   // 관심종목 변경 콜백
   const handleWatchlistChange = useCallback((newWatchlist) => {
@@ -278,6 +296,24 @@ function MainPage() {
     const newHistory = [newRecord, ...history].slice(0, 20);
     setHistory(newHistory);
     localStorage.setItem('darong_history', JSON.stringify(newHistory));
+
+    // 감정별 채쌤 알림
+    const emotionMessages = {
+      excited: '와! 흥미진진한 투자 타이밍이네요! 하지만 너무 성급하지 마세요 😊',
+      happy: '좋은 기분이네요! 수익이 날 때일수록 차분함을 유지하세요 ✨',
+      confident: '자신감이 넘치시네요! 과신은 금물, 항상 리스크 관리를 잊지 마세요 💪',
+      worried: '걱정되시는군요. 이럴 때일수록 차분히 데이터를 분석해보세요 🤔',
+      surprised: '놀라운 상황이군요! 예상치 못한 변동성에 대비하세요 😲',
+      greed: '수익에 대한 욕심이 생기셨나요? 적절한 수익실현도 중요해요 💰',
+      fear: '두려움을 느끼고 계시네요. 감정적 판단보다는 객관적 분석이 필요해요 😰'
+    };
+
+    if (emotionMessages[emo]) {
+      notification.info(emotionMessages[emo], {
+        title: '채쌤의 감정 코칭',
+        duration: 6000
+      });
+    }
   };
 
   const bg = darkMode ? '#181a1b' : '#f8f9fa';
@@ -402,6 +438,12 @@ function MainPage() {
           setIsFirstVisit(false);
           setShowOnboarding(false);
         }}
+      />
+      
+      {/* 채쌤 알림 시스템 */}
+      <ChaessaemNotificationContainer
+        notifications={notification.notifications}
+        darkMode={darkMode}
       />
     </div>
   );

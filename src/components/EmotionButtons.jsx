@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import ChaessaemEmoji from './ChaessaemEmoji';
 
 const emotions = [
   // 기존 32개
@@ -282,12 +283,23 @@ function EmotionButtons({ onSelect, darkMode = false }) {
             }}>✨</div>
             
             <div style={{
-              fontSize: '2.5rem',
               marginBottom: '0.3rem',
               filter: 'drop-shadow(0 3px 6px rgba(0,0,0,0.15))',
               transition: 'all 0.3s'
             }}>
-              {emotion.emoji}
+              <ChaessaemEmoji
+                type="emotions"
+                emotion={emotion.key === 'excited' ? 'excited' : 
+                         emotion.key === 'happy' ? 'happy' :
+                         emotion.key === 'confident' ? 'confident' :
+                         emotion.key === 'worried' ? 'worried' :
+                         emotion.key === 'surprised' ? 'surprised' :
+                         emotion.key === 'love' ? 'love' : 'thinking'}
+                size="normal"
+                showMessage={false}
+                autoAnimation={true}
+                darkMode={darkMode}
+              />
             </div>
             <div style={{
               fontSize: '0.8rem',

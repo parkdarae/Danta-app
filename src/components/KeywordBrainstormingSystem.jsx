@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { useTheme } from '../hooks/useTheme';
+import ChaessaemEmoji from './ChaessaemEmoji';
 
 // AI 프롬프트는 컴포넌트 외부로 이동하여 재생성 방지
 const AI_PROMPTS = [
@@ -215,9 +216,19 @@ const KeywordBrainstormingSystem = ({ darkMode = false, onKeywordsGenerated }) =
         {/* AI 보조 프롬프트 */}
         {showAIPrompts && (
           <div style={{ marginBottom: '25px' }}>
-            <h3 style={{ color: theme.text, fontSize: '18px', marginBottom: '20px' }}>
-              🤖 AI 브레인스토밍 도우미
-            </h3>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
+              <ChaessaemEmoji
+                type="emotions"
+                emotion="thinking"
+                size="normal"
+                showMessage={false}
+                autoAnimation={true}
+                darkMode={darkMode}
+              />
+              <h3 style={{ color: theme.text, fontSize: '18px', margin: 0 }}>
+                채쌤의 브레인스토밍 도우미
+              </h3>
+            </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
               {AI_PROMPTS.map(prompt => (
                 <div
