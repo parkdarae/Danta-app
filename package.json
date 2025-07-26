@@ -2,7 +2,7 @@
   "name": "danta-trader-app",
   "version": "1.0.0",
   "private": true,
-  "homepage": ".",
+  "homepage": "https://parkdarae.github.io/Danta-app",
   "engines": {
     "node": ">=18.0.0",
     "npm": ">=8.0.0"
@@ -19,7 +19,9 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d build"
   },
   "eslintConfig": {
     "extends": [
