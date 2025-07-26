@@ -1,37 +1,33 @@
 import { useCallback, useRef, useEffect, useMemo } from 'react';
 
-/**
- * 성능 최적화를 위한 커스텀 훅
- */
+// 성능 최적화 관련 훅들
 export const usePerformanceOptimization = () => {
   const cache = useRef(new Map());
   const debounceTimers = useRef(new Map());
 
-  // 메모이제이션 훅
-  const useMemoizedCalculation = useCallback((fn, deps, key) => {
-    return useMemo(() => {
-      const cacheKey = key || JSON.stringify(deps);
-      
-      if (cache.current.has(cacheKey)) {
-        return cache.current.get(cacheKey);
-      }
-      
-      const result = fn();
-      cache.current.set(cacheKey, result);
-      
-      // 캐시 크기 제한
-      if (cache.current.size > 50) {
-        const firstKey = cache.current.keys().next().value;
-        cache.current.delete(firstKey);
-      }
-      
-      return result;
-    }, deps);
+  // 메모이제이션 함수 (일반 함수로 변경)
+  const memoizeCalculation = useCallback((fn, deps, key) => {
+    const cacheKey = key || JSON.stringify(deps);
+    
+    if (cache.current.has(cacheKey)) {
+      return cache.current.get(cacheKey);
+    }
+    
+    const result = fn();
+    cache.current.set(cacheKey, result);
+    
+    // 캐시 크기 제한
+    if (cache.current.size > 50) {
+      const firstKey = cache.current.keys().next().value;
+      cache.current.delete(firstKey);
+    }
+    
+    return result;
   }, []);
 
   // 디바운싱 함수
-  const useDebounce = useCallback((fn, delay, key = 'default') => {
-    return useCallback((...args) => {
+  const debounce = useCallback((fn, delay, key = 'default') => {
+    return (...args) => {
       if (debounceTimers.current.has(key)) {
         clearTimeout(debounceTimers.current.get(key));
       }
@@ -42,24 +38,25 @@ export const usePerformanceOptimization = () => {
       }, delay);
       
       debounceTimers.current.set(key, timer);
-    }, [fn, delay, key]);
+    };
   }, []);
 
   // 스로틀링 함수
-  const useThrottle = useCallback((fn, delay) => {
-    const lastRun = useRef(Date.now() - delay);
+  const throttle = useCallback((fn, delay) => {
+    let lastRun = Date.now() - delay;
     
-    return useCallback((...args) => {
-      if (Date.now() - lastRun.current >= delay) {
+    return (...args) => {
+      if (Date.now() - lastRun >= delay) {
         fn(...args);
-        lastRun.current = Date.now();
+        lastRun = Date.now();
       }
-    }, [fn, delay]);
+    };
   }, []);
 
   // 컴포넌트 언마운트 시 정리
   useEffect(() => {
     return () => {
+      // 타이머 정리
       debounceTimers.current.forEach(timer => clearTimeout(timer));
       debounceTimers.current.clear();
       cache.current.clear();
@@ -67,25 +64,23 @@ export const usePerformanceOptimization = () => {
   }, []);
 
   return {
-    useMemoizedCalculation,
-    useDebounce,
-    useThrottle
+    memoizeCalculation,
+    debounce,
+    throttle
   };
 };
 
-/**
- * 비동기 작업 최적화 훅
- */
+// 비동기 작업 최적화 훅
 export const useAsyncOptimization = () => {
   const abortControllers = useRef(new Map());
 
   const executeWithAbort = useCallback(async (fn, key = 'default') => {
-    // 이전 요청 취소
+    // 이전 작업 취소
     if (abortControllers.current.has(key)) {
       abortControllers.current.get(key).abort();
     }
 
-    // 새로운 AbortController 생성
+    // 새 AbortController 생성
     const controller = new AbortController();
     abortControllers.current.set(key, controller);
 
@@ -95,7 +90,7 @@ export const useAsyncOptimization = () => {
       return result;
     } catch (error) {
       if (error.name === 'AbortError') {
-        console.log(`요청 취소됨: ${key}`);
+        console.log('작업이 취소되었습니다');
         return null;
       }
       abortControllers.current.delete(key);
@@ -114,7 +109,7 @@ export const useAsyncOptimization = () => {
       );
       results.push(...batchResults);
       
-      // 다음 배치 전에 잠시 대기 (UI 블로킹 방지)
+      // 다음 배치 전 잠시 대기 (UI 블록킹 방지)
       if (i + batchSize < items.length) {
         await new Promise(resolve => setTimeout(resolve, 10));
       }
@@ -123,6 +118,7 @@ export const useAsyncOptimization = () => {
     return results;
   }, []);
 
+  // 정리
   useEffect(() => {
     return () => {
       abortControllers.current.forEach(controller => controller.abort());
@@ -136,45 +132,36 @@ export const useAsyncOptimization = () => {
   };
 };
 
-/**
- * 메모리 사용량 모니터링 훅
- */
+// 메모리 모니터링 훅
 export const useMemoryMonitoring = () => {
   const memoryUsage = useRef({
+    used: 0,
+    total: 0,
     peak: 0,
-    current: 0,
-    history: []
+    timestamp: Date.now()
   });
 
   const trackMemoryUsage = useCallback(() => {
     if (performance.memory) {
       const current = performance.memory.usedJSHeapSize / 1024 / 1024; // MB
-      
-      memoryUsage.current.current = current;
-      memoryUsage.current.peak = Math.max(memoryUsage.current.peak, current);
-      memoryUsage.current.history.push({
-        timestamp: Date.now(),
-        usage: current
-      });
-
-      // 히스토리 크기 제한
-      if (memoryUsage.current.history.length > 100) {
-        memoryUsage.current.history.shift();
-      }
-
-      return current;
+      memoryUsage.current = {
+        used: current,
+        total: performance.memory.totalJSHeapSize / 1024 / 1024,
+        peak: Math.max(memoryUsage.current.peak, current),
+        timestamp: Date.now()
+      };
     }
-    return null;
+    return memoryUsage.current;
   }, []);
 
   const getMemoryReport = useCallback(() => {
+    const current = trackMemoryUsage();
     return {
-      current: memoryUsage.current.current,
-      peak: memoryUsage.current.peak,
-      average: memoryUsage.current.history.reduce((sum, item) => sum + item.usage, 0) / memoryUsage.current.history.length,
-      history: memoryUsage.current.history
+      ...current,
+      isHigh: current.used > 100, // 100MB 이상
+      isCritical: current.used > 500 // 500MB 이상
     };
-  }, []);
+  }, [trackMemoryUsage]);
 
   useEffect(() => {
     const interval = setInterval(trackMemoryUsage, 5000); // 5초마다 체크
@@ -183,6 +170,7 @@ export const useMemoryMonitoring = () => {
 
   return {
     trackMemoryUsage,
-    getMemoryReport
+    getMemoryReport,
+    currentUsage: memoryUsage.current
   };
 }; 

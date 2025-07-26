@@ -3,6 +3,43 @@
  * 엔티티 간 관계 분석, 네트워크 그래프 구성, 영향도 분석
  */
 
+// 헬퍼 함수들 (일반 함수로 정의)
+function calculatePearsonCorrelation(x, y) {
+  if (!x || !y || x.length !== y.length || x.length === 0) {
+    return 0;
+  }
+
+  const n = x.length;
+  const sumX = x.reduce((a, b) => a + b, 0);
+  const sumY = y.reduce((a, b) => a + b, 0);
+  const sumXY = x.reduce((sum, xi, i) => sum + xi * y[i], 0);
+  const sumX2 = x.reduce((sum, xi) => sum + xi * xi, 0);
+  const sumY2 = y.reduce((sum, yi) => sum + yi * yi, 0);
+
+  const numerator = n * sumXY - sumX * sumY;
+  const denominator = Math.sqrt((n * sumX2 - sumX * sumX) * (n * sumY2 - sumY * sumY));
+
+  if (denominator === 0) return 0;
+  return numerator / denominator;
+}
+
+function calculateVolatility(priceData) {
+  if (!priceData || priceData.length < 2) return 0;
+  
+  const returns = [];
+  for (let i = 1; i < priceData.length; i++) {
+    if (priceData[i-1] !== 0) {
+      returns.push((priceData[i] - priceData[i-1]) / priceData[i-1]);
+    }
+  }
+  
+  if (returns.length === 0) return 0;
+  
+  const mean = returns.reduce((a, b) => a + b, 0) / returns.length;
+  const variance = returns.reduce((sum, ret) => sum + Math.pow(ret - mean, 2), 0) / returns.length;
+  return Math.sqrt(variance);
+}
+
 // 분석 타입 정의
 export const ANALYSIS_TYPES = {
   PEARSON: 'pearson',

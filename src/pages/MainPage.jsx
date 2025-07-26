@@ -23,8 +23,6 @@ import PerformanceMonitor from '../components/PerformanceMonitor';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { STORAGE_KEYS, STOCKS } from '../utils/constants';
 
-const STOCKS = ['에이지이글', '삼성전자', '카카오'];
-
 function MainPage() {
   const [emotion, setEmotion] = useState('neutral');
   const [selectedStock, setSelectedStock] = useLocalStorage(STORAGE_KEYS.SELECTED_STOCK, STOCKS[1]);
