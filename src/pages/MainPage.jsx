@@ -30,6 +30,8 @@ import EmotionalTradingTracker from '../components/EmotionalTradingTracker';
 import MetaCognitionReport from '../components/MetaCognitionReport';
 import KeywordToStockWorkflow from '../components/KeywordToStockWorkflow';
 import UserPage from '../components/UserPage';
+import EnhancedChaessaemAI from '../components/EnhancedChaessaemAI';
+import AIModelSettings from '../components/AIModelSettings';
 import AIStockMentor from '../components/AIStockMentor';
 import InteractiveGuide from '../components/InteractiveGuide';
 import { useChaessaemNotification, ChaessaemNotificationContainer } from '../components/ChaessaemNotification';
@@ -271,9 +273,25 @@ function MainPage() {
           </>
         );
       
+      case 'ai-chat':
+        return (
+          <>
+            <EnhancedChaessaemAI 
+              darkMode={darkMode}
+              userProfile={JSON.parse(localStorage.getItem('user_profile') || '{}')}
+              currentContext={`현재 선택된 종목: ${selectedStock || '없음'}`}
+              onResponse={(response) => console.log('채쌤 응답:', response)}
+            />
+          </>
+        );
+      
       case 'tools':
         return (
           <>
+            <AIModelSettings 
+              darkMode={darkMode}
+              onModelChange={(config) => console.log('AI 모델 변경:', config)}
+            />
             <DataBackupRestore darkMode={darkMode} />
             <DataExportPanel darkMode={darkMode} />
             <CustomDashboard darkMode={darkMode} />
@@ -408,6 +426,7 @@ function MainPage() {
               case 'portfolio': return '💼 포트폴리오';
               case 'psychology': return '🧠 감정 & 메타인지';
               case 'discovery': return '🚀 키워드 종목 발굴';
+              case 'ai-chat': return '🤖 AI 채팅';
               case 'tools': return '🛠️ 관리 도구';
               default: return '카테고리 선택';
             }

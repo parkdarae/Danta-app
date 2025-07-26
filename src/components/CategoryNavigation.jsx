@@ -54,6 +54,12 @@ const CategoryNavigation = ({ currentCategory, onCategoryChange, darkMode = fals
       icon: '🔍'
     },
     {
+      id: 'ai-chat',
+      name: '🤖 AI 채팅',
+      description: 'Mistral AI 채쌤과 실시간 대화',
+      icon: '💬'
+    },
+    {
       id: 'tools',
       name: '🛠️ 도구',
       description: '데이터관리, 설정, 튜토리얼',
