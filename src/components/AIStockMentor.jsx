@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useTheme } from '../hooks/useTheme';
 import { useTypography } from '../hooks/useTypography';
 import { useLocalStorage } from '../hooks/useLocalStorage';
-import ChaessaemEmoji from './ChaessaemEmoji';
+import ChaessaemCharacter from './ChaessaemCharacter';
 
 // 멘토의 조언 데이터베이스
 const MENTOR_ADVICE = {
@@ -20,6 +20,12 @@ const MENTOR_ADVICE = {
         content: "AI나 드론 같은 키워드를 선택하셨네요! 이런 기술 분야는 정말 유망하지만, 한 가지 주의할 점이 있어요. '테마 투자'는 단기간에 큰 수익을 낼 수 있지만 변동성도 크답니다.",
         tip: "⚠️ 현실 조언: 테마주 투자 시 투자금의 20% 이하로 시작하세요. 나머지는 안정적인 우량주에 투자하는 게 좋습니다.",
         level: "intermediate"
+      },
+      {
+        title: "🔍 시장 트렌드 읽기",
+        content: "시장은 항상 변화하고 있어요. 지금 핫한 키워드가 내년에도 핫할까요? 의외로 그렇지 않은 경우가 많답니다. 트렌드를 따라가되, 맹신하지는 마세요.",
+        tip: "📈 실전 노하우: 트렌드가 정점에 달했을 때는 오히려 조심해야 할 시기입니다. 모든 사람이 알고 있는 호재는 이미 주가에 반영되어 있어요.",
+        level: "advanced"
       }
     ],
     intermediate: [
@@ -27,6 +33,12 @@ const MENTOR_ADVICE = {
         title: "🔍 키워드 간 연관성 분석",
         content: "여러 키워드를 조합하신 걸 보니 투자 센스가 있으시네요! '우크라이나 + 국방 + 드론'처럼 연관된 키워드들은 시너지 효과를 만들어냅니다.",
         tip: "📈 전문가 관점: 글로벌 이슈와 기술 발전이 만나는 지점을 찾으세요. 2022년 우크라이나 사태로 방산주가 급등한 것처럼 말이죠.",
+        level: "intermediate"
+      },
+      {
+        title: "💰 섹터 로테이션의 비밀",
+        content: "섹터별로 돌아가며 주목받는 것을 '섹터 로테이션'이라고 해요. 지금 IT가 핫하다면, 다음엔 바이오나 에너지가 주목받을 수 있어요.",
+        tip: "🔄 고수 전략: 한 섹터가 과열되면 다른 섹터로 눈을 돌려보세요. 항상 다음을 준비하는 투자자가 승리합니다.",
         level: "intermediate"
       }
     ]
@@ -45,6 +57,12 @@ const MENTOR_ADVICE = {
         title: "🚀 밈주식의 양면성",
         content: "밈주식도 고려하고 계시는군요! 2021년 게임스탑 사태를 기억하시나요? 밈주식은 단기간에 10배도 오르지만, 하루 만에 90% 떨어지기도 해요.",
         tip: "⚡ 생생한 경험담: 제가 본 최고의 밈주식 투자자는 수익의 50%를 항상 현금화했어요. 욕심을 버리는 게 핵심입니다.",
+        level: "beginner"
+      },
+      {
+        title: "🏢 기업 분석의 기초",
+        content: "좋은 기업을 찾는 것이 투자의 시작이에요. 매출이 꾸준히 증가하고, 부채가 적고, 시장에서 경쟁력이 있는 기업을 찾아보세요.",
+        tip: "📊 분석 팁: 최소 3년간의 재무제표를 살펴보세요. 일회성 호재보다는 꾸준한 성장이 중요합니다.",
         level: "beginner"
       }
     ],
@@ -98,475 +116,394 @@ const CONTEXTUAL_GUIDES = {
   firstVisit: {
     title: "🎉 투자의 세계에 오신 것을 환영합니다!",
     content: "안녕하세요! 저는 25년 경력의 주식 전문가입니다. 여러분의 투자 여정을 도와드릴게요. 먼저 '🚀 키워드 종목 발굴'부터 시작해보시는 걸 추천해요.",
-    steps: [
-      "1️⃣ 관심 있는 분야의 키워드를 생각해보세요",
-      "2️⃣ AI 보조 질문으로 체계적으로 접근하세요", 
-      "3️⃣ 발굴된 종목들을 차근차근 분석해보세요",
-      "4️⃣ 감정과 함께 매매 이유를 기록하세요"
-    ]
+    tip: "🎯 시작 가이드: 투자는 공부가 90%, 실전이 10%입니다. 서두르지 마시고 차근차근 배워나가세요!",
+    level: "beginner"
   },
-  
-  keywordEmpty: {
-    title: "🤔 어떤 키워드를 선택할지 고민되시나요?",
-    content: "괜찮아요! 처음엔 누구나 그래요. 일상에서 자주 보거나 들은 것부터 시작해보세요.",
-    suggestions: [
-      "📱 스마트폰 관련: 'AI', '반도체', '배터리'",
-      "🌍 사회 이슈: '친환경', '고령화', '우크라이나'",
-      "🎮 취미 관련: '게임', '메타버스', 'VR'",
-      "🏭 산업 동향: '전기차', '우주항공', '바이오'"
-    ]
-  },
-
-  memeStockWarning: {
-    title: "⚠️ 밈주식 투자 전에 꼭 알아두세요!",
-    content: "밈주식은 소셜미디어 인기로 급등하는 주식이에요. 큰 수익도 가능하지만 그만큼 위험해요.",
-    warnings: [
-      "🎢 극심한 변동성: 하루에 50% 오르락내리락",
-      "📉 펀더멘털 무시: 실제 가치와 괴리",
-      "🕐 단기성: 인기가 사라지면 급락",
-      "💰 소액 투자: 전체 자산의 5% 이하 권장"
-    ]
+  profileComplete: {
+    title: "✨ 프로필 설정 완료!",
+    content: "프로필 설정을 완료하셨네요! 이제 본격적으로 투자 공부를 시작해볼까요? 여러분의 투자 성향에 맞는 맞춤형 조언을 준비했어요.",
+    tip: "🎊 다음 단계: 키워드 브레인스토밍부터 시작해서 천천히 모든 기능을 체험해보세요!",
+    level: "beginner"
   }
 };
 
-const AIStockMentor = ({ 
-  darkMode = false, 
-  currentSection = 'general',
+const AIStockMentor = ({
+  darkMode = false,
+  currentSection = 'brainstorming',
   userLevel = 'beginner',
   keywords = [],
-  selectedStock = null,
+  selectedStock = '',
   isFirstVisit = false,
-  userProfile = {}
+  userProfile = {},
+  onClose,
+  isVisible = true
 }) => {
   const theme = useTheme(darkMode);
   const typography = useTypography(darkMode);
-  const [currentAdvice, setCurrentAdvice] = useState(null);
-  const [showGuide, setShowGuide] = useState(false);
-  const [mentorPersonality, setMentorPersonality] = useLocalStorage('mentor_personality', 'wise');
+  
+  // 상태 관리
+  const [currentAdviceIndex, setCurrentAdviceIndex] = useState(0);
   const [userProgress, setUserProgress] = useLocalStorage('user_progress', {
+    overall: 0,
     brainstorming: 0,
     discovery: 0,
     emotional: 0,
-    overall: 0
+    completed: false
   });
+  const [completedTips, setCompletedTips] = useLocalStorage('completed_tips', []);
+  const [showCloseConfirm, setShowCloseConfirm] = useState(false);
 
-  // 사용자 이름 가져오기 함수
-  const getUserDisplayName = () => {
-    const { name, nickname } = userProfile;
-    if (!name && !nickname) return '';
-    if (name && !nickname) return name + '님';
-    if (!name && nickname) return nickname;
+  // 현재 조언 가져오기
+  const getCurrentAdviceList = useCallback(() => {
+    if (isFirstVisit && !userProfile.name) {
+      return [CONTEXTUAL_GUIDES.firstVisit];
+    }
     
-    // 상황에 맞게 혼용
-    const useNickname = Math.random() > 0.5;
-    return useNickname ? nickname : name + '님';
-  };
-
-  const displayName = getUserDisplayName();
-
-  // 멘토 성격별 스타일
-  const mentorStyles = {
-    wise: {
-      name: "현명한 노인",
-      avatar: "👴",
-      tone: "차분하고 경험 중심",
-      greeting: "25년 투자 경험을 바탕으로"
-    },
-    friendly: {
-      name: "친근한 선배",
-      avatar: "😊",
-      tone: "친근하고 격려적",
-      greeting: "함께 투자 공부해요!"
-    },
-    analytical: {
-      name: "분석적 전문가",
-      avatar: "🤓",
-      tone: "논리적이고 데이터 중심",
-      greeting: "데이터로 말하는"
+    if (userProfile.name && userProgress.overall === 0) {
+      return [CONTEXTUAL_GUIDES.profileComplete];
     }
-  };
-
-  const currentMentor = mentorStyles[mentorPersonality];
-
-  // 상황별 조언 선택 로직
-  const getContextualAdvice = useCallback(() => {
-    // 첫 방문자 가이드 (개인화)
-    if (isFirstVisit) {
-      return {
-        ...CONTEXTUAL_GUIDES.firstVisit,
-        title: displayName ? `🎉 ${displayName}, 투자의 세계에 오신 것을 환영합니다!` : CONTEXTUAL_GUIDES.firstVisit.title,
-        content: displayName ? `안녕하세요, ${displayName}! 저는 25년 경력의 주식 전문가입니다. 여러분의 투자 여정을 도와드릴게요.` : CONTEXTUAL_GUIDES.firstVisit.content
-      };
+    
+    const sectionAdvice = MENTOR_ADVICE[currentSection]?.[userLevel] || [];
+    if (sectionAdvice.length === 0) {
+      return MENTOR_ADVICE.general;
     }
+    return sectionAdvice;
+  }, [currentSection, userLevel, isFirstVisit, userProfile, userProgress.overall]);
 
-    // 키워드가 비어있을 때
-    if (currentSection === 'brainstorming' && keywords.length === 0) {
-      return CONTEXTUAL_GUIDES.keywordEmpty;
-    }
+  const currentAdviceList = getCurrentAdviceList();
+  const currentAdvice = currentAdviceList[currentAdviceIndex] || currentAdviceList[0];
 
-    // 밈주식 관련 경고
-    if (currentSection === 'discovery' && keywords.some(k => 
-      ['밈', 'meme', '레딧', '급등'].some(meme => k.toLowerCase().includes(meme.toLowerCase()))
-    )) {
-      return CONTEXTUAL_GUIDES.memeStockWarning;
-    }
-
-    // 섹션별 조언 (개인화)
-    const sectionAdvice = MENTOR_ADVICE[currentSection];
-    if (sectionAdvice && sectionAdvice[userLevel]) {
-      const adviceList = sectionAdvice[userLevel];
-      const selectedAdvice = adviceList[Math.floor(Math.random() * adviceList.length)];
+  // 진도율 업데이트
+  const updateProgress = useCallback((section, increment = 15) => {
+    setUserProgress(prev => {
+      const newSectionProgress = Math.min(100, (prev[section] || 0) + increment);
+      const newOverallProgress = Math.min(100, prev.overall + increment);
       
-      // 개인화된 조언 반환
-      if (displayName && selectedAdvice.content) {
-        return {
-          ...selectedAdvice,
-          content: selectedAdvice.content.replace(/좋아요!/g, `${displayName}! 좋아요!`)
-                                       .replace(/정말 훌륭해요!/g, `${displayName}! 정말 훌륭해요!`)
-                                       .replace(/괜찮아요!/g, `${displayName}! 괜찮아요!`)
-        };
-      }
-      return selectedAdvice;
-    }
-
-    // 일반적인 조언 (개인화)
-    const generalAdvice = MENTOR_ADVICE.general;
-    const selectedGeneral = generalAdvice[Math.floor(Math.random() * generalAdvice.length)];
-    
-    if (displayName) {
-      return {
-        ...selectedGeneral,
-        content: displayName + '! ' + selectedGeneral.content
+      const updated = {
+        ...prev,
+        [section]: newSectionProgress,
+        overall: newOverallProgress,
+        completed: newOverallProgress >= 100
       };
-    }
-    
-    return selectedGeneral;
-  }, [currentSection, userLevel, keywords, isFirstVisit, displayName]);
-
-  // 조언 업데이트
-  useEffect(() => {
-    const advice = getContextualAdvice();
-    setCurrentAdvice(advice);
-  }, [getContextualAdvice]);
-
-  // 사용자 진행도 업데이트
-  const updateProgress = useCallback((section, increment = 10) => {
-    setUserProgress(prev => ({
-      ...prev,
-      [section]: Math.min(100, prev[section] + increment),
-      overall: Math.min(100, prev.overall + increment / 4)
-    }));
+      
+      return updated;
+    });
   }, [setUserProgress]);
 
-  // 멘토 성격 변경
-  const changeMentorPersonality = useCallback((personality) => {
-    setMentorPersonality(personality);
-  }, [setMentorPersonality]);
+  // 다음 팁으로 자동 이동
+  const moveToNextTip = useCallback(() => {
+    const tipId = `${currentSection}-${currentAdviceIndex}`;
+    if (!completedTips.includes(tipId)) {
+      setCompletedTips(prev => [...prev, tipId]);
+    }
+    
+    updateProgress(currentSection, 15);
+    
+    // 0.5초 후 다음 팁으로 이동
+    setTimeout(() => {
+      if (currentAdviceIndex < currentAdviceList.length - 1) {
+        setCurrentAdviceIndex(prev => prev + 1);
+      } else {
+        // 현재 섹션의 모든 팁 완료 시 다음 섹션으로
+        const sections = ['brainstorming', 'discovery', 'emotional'];
+        const currentSectionIndex = sections.indexOf(currentSection);
+        
+        if (currentSectionIndex < sections.length - 1) {
+          // 다음 섹션으로 이동 (실제로는 부모 컴포넌트에서 처리)
+          setCurrentAdviceIndex(0);
+        } else {
+          // 모든 섹션 완료 시 자동 닫기
+          setTimeout(() => {
+            if (onClose) onClose();
+          }, 1000);
+        }
+      }
+    }, 500);
+  }, [currentSection, currentAdviceIndex, currentAdviceList.length, completedTips, setCompletedTips, updateProgress, onClose]);
 
-  if (!currentAdvice) return null;
+  // 진도율 100% 달성 시 자동 닫기
+  useEffect(() => {
+    if (userProgress.completed && userProgress.overall >= 100) {
+      setTimeout(() => {
+        if (onClose) onClose();
+      }, 2000);
+    }
+  }, [userProgress.completed, userProgress.overall, onClose]);
+
+  // 닫기 확인 다이얼로그
+  const handleCloseClick = () => {
+    if (userProgress.overall < 100) {
+      setShowCloseConfirm(true);
+    } else {
+      if (onClose) onClose();
+    }
+  };
+
+  // 컴포넌트가 보이지 않으면 렌더링하지 않음
+  if (!isVisible) return null;
 
   return (
     <div style={{
       position: 'fixed',
-      bottom: '20px',
-      right: '20px',
-      width: '380px',
-      maxHeight: '500px',
-      background: theme.cardBg,
-      borderRadius: '16px',
-      border: `2px solid ${theme.accent}`,
-      boxShadow: theme.shadows.xl,
-      overflow: 'hidden',
-      zIndex: 1000,
-      fontFamily: typography.fontFamily.primary
+      top: '0',
+      left: '0',
+      right: '0',
+      bottom: '0',
+      background: 'rgba(0, 0, 0, 0.7)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      zIndex: 10000,
+      padding: '20px'
     }}>
-      {/* 멘토 헤더 */}
       <div style={{
-        background: theme.gradients.ocean,
-        padding: '16px',
-        color: 'white',
+        background: theme.colors.surface,
+        borderRadius: '16px',
+        boxShadow: theme.shadows.xl,
+        maxWidth: '600px',
+        width: '100%',
+        maxHeight: '80vh',
+        overflow: 'hidden',
         display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center'
+        flexDirection: 'column'
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <ChaessaemEmoji
-            type="emotions"
-            emotion={currentSection === 'discovery' ? 'excited' : 'confident'}
-            size="normal"
-            showMessage={false}
-            darkMode={false}
-          />
-          <div>
-            <div style={{ 
-              ...typography.presets.body.small,
-              fontWeight: typography.fontWeight.bold,
-              marginBottom: '2px'
-            }}>
-              채쌤 AI 투자 멘토
-            </div>
-            <div style={{ 
-              ...typography.presets.caption,
-              color: 'rgba(255,255,255,0.8)'
-            }}>
-              {currentMentor.greeting}
+        {/* 헤더 */}
+        <div style={{
+          background: `linear-gradient(135deg, ${theme.colors.accent}, ${theme.colors.primary})`,
+          color: 'white',
+          padding: '20px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <ChaessaemCharacter 
+              size="small" 
+              darkMode={true}
+              showMessage={false}
+            />
+            <div>
+              <h3 style={{
+                ...typography.presets.heading.h3,
+                color: 'white',
+                margin: '0 0 4px 0'
+              }}>
+                📚 채쌤과 함께하는 투자 공부
+              </h3>
+              <div style={{
+                fontSize: '14px',
+                opacity: 0.9
+              }}>
+                진도율: {Math.round(userProgress.overall)}% | 
+                팁 {currentAdviceIndex + 1}/{currentAdviceList.length}
+              </div>
             </div>
           </div>
-        </div>
-        
-        <div style={{ display: 'flex', gap: '8px' }}>
-          {/* 멘토 성격 변경 버튼 */}
-          <select
-            value={mentorPersonality}
-            onChange={(e) => changeMentorPersonality(e.target.value)}
-            style={{
-              background: 'rgba(255,255,255,0.2)',
-              border: 'none',
-              color: 'white',
-              borderRadius: '6px',
-              padding: '4px 8px',
-              fontSize: '12px'
-            }}
-          >
-            <option value="wise" style={{ color: '#333' }}>현명한 노인</option>
-            <option value="friendly" style={{ color: '#333' }}>친근한 선배</option>
-            <option value="analytical" style={{ color: '#333' }}>분석적 전문가</option>
-          </select>
           
+          {/* 닫기 버튼 */}
           <button
-            onClick={() => setShowGuide(!showGuide)}
+            onClick={handleCloseClick}
             style={{
-              background: 'rgba(255,255,255,0.2)',
+              background: 'rgba(255, 255, 255, 0.2)',
               border: 'none',
+              borderRadius: '50%',
+              width: '32px',
+              height: '32px',
               color: 'white',
-              borderRadius: '6px',
-              padding: '4px 8px',
               cursor: 'pointer',
-              fontSize: '12px'
+              fontSize: '16px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
             }}
           >
-            {showGuide ? '✕' : '?'}
+            ✕
           </button>
         </div>
-      </div>
 
-      {/* 진행도 표시 */}
-      <div style={{
-        background: theme.bg,
-        padding: '12px 16px',
-        borderBottom: `1px solid ${theme.border}`
-      }}>
-        <div style={{ 
-          display: 'flex', 
-          justifyContent: 'space-between', 
-          alignItems: 'center',
-          marginBottom: '8px'
-        }}>
-          <span style={{ 
-            ...typography.presets.label,
-            color: typography.colors.secondary
-          }}>
-            투자 학습 진도
-          </span>
-          <span style={{ 
-            ...typography.presets.body.small,
-            color: typography.colors.accent,
-            fontWeight: typography.fontWeight.semibold
-          }}>
-            {Math.round(userProgress.overall)}%
-          </span>
-        </div>
+        {/* 진도바 */}
         <div style={{
-          width: '100%',
+          background: `${theme.colors.accent}20`,
           height: '6px',
-          background: theme.border,
-          borderRadius: '3px',
-          overflow: 'hidden'
+          position: 'relative'
         }}>
           <div style={{
-            width: `${userProgress.overall}%`,
+            background: `linear-gradient(90deg, ${theme.colors.accent}, ${theme.colors.positive})`,
             height: '100%',
-            background: theme.gradients.success,
-            transition: 'width 0.3s ease'
+            width: `${userProgress.overall}%`,
+            transition: 'width 0.5s ease',
+            borderRadius: '0 3px 3px 0'
           }} />
         </div>
-      </div>
 
-      {/* 조언 내용 */}
-      <div style={{
-        padding: '20px',
-        maxHeight: '300px',
-        overflowY: 'auto'
-      }}>
-        {/* 제목 */}
-        <h3 style={{
-          ...typography.presets.heading.h4,
-          color: typography.colors.primary,
-          margin: '0 0 12px 0'
-        }}>
-          {currentAdvice.title}
-        </h3>
-
-        {/* 내용 */}
+        {/* 메인 콘텐츠 */}
         <div style={{
-          ...typography.presets.body.normal,
-          color: typography.colors.secondary,
-          lineHeight: typography.lineHeight.relaxed,
-          marginBottom: '16px'
+          padding: '24px',
+          flex: 1,
+          overflow: 'auto'
         }}>
-          {currentAdvice.content}
-        </div>
-
-        {/* 팁 */}
-        {currentAdvice.tip && (
-          <div style={{
-            background: theme.gradients.warning,
-            padding: '12px',
-            borderRadius: '8px',
+          {/* 조언 제목 */}
+          <h4 style={{
+            ...typography.presets.heading.h4,
+            color: typography.colors.primary,
             marginBottom: '16px'
+          }}>
+            {currentAdvice.title}
+          </h4>
+
+          {/* 조언 내용 */}
+          <div style={{
+            ...typography.presets.body.normal,
+            color: typography.colors.primary,
+            lineHeight: 1.6,
+            marginBottom: '20px',
+            background: `${theme.colors.accent}10`,
+            padding: '16px',
+            borderRadius: '12px',
+            borderLeft: `4px solid ${theme.colors.accent}`
+          }}>
+            {currentAdvice.content}
+          </div>
+
+          {/* 팁 */}
+          <div style={{
+            background: `${theme.colors.positive}15`,
+            padding: '16px',
+            borderRadius: '12px',
+            borderLeft: `4px solid ${theme.colors.positive}`,
+            marginBottom: '24px'
           }}>
             <div style={{
               ...typography.presets.body.small,
-              color: 'white',
-              lineHeight: typography.lineHeight.normal
+              color: typography.colors.primary,
+              fontWeight: typography.fontWeight.medium
             }}>
               {currentAdvice.tip}
             </div>
           </div>
-        )}
-
-        {/* 단계별 가이드 */}
-        {currentAdvice.steps && (
-          <div style={{ marginBottom: '16px' }}>
-            <h4 style={{
-              ...typography.presets.heading.h4,
-              color: typography.colors.primary,
-              marginBottom: '8px'
-            }}>
-              📋 단계별 가이드
-            </h4>
-            {currentAdvice.steps.map((step, index) => (
-              <div
-                key={index}
-                style={{
-                  ...typography.presets.body.small,
-                  color: typography.colors.secondary,
-                  marginBottom: '6px',
-                  paddingLeft: '8px'
-                }}
-              >
-                {step}
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* 제안사항 */}
-        {currentAdvice.suggestions && (
-          <div style={{ marginBottom: '16px' }}>
-            <h4 style={{
-              ...typography.presets.heading.h4,
-              color: typography.colors.primary,
-              marginBottom: '8px'
-            }}>
-              💡 추천 키워드
-            </h4>
-            {currentAdvice.suggestions.map((suggestion, index) => (
-              <div
-                key={index}
-                style={{
-                  ...typography.presets.body.small,
-                  color: typography.colors.secondary,
-                  marginBottom: '4px',
-                  paddingLeft: '8px'
-                }}
-              >
-                {suggestion}
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* 경고사항 */}
-        {currentAdvice.warnings && (
-          <div style={{
-            background: theme.gradients.danger,
-            padding: '12px',
-            borderRadius: '8px',
-            marginBottom: '16px'
-          }}>
-            <h4 style={{
-              ...typography.presets.heading.h4,
-              color: 'white',
-              marginBottom: '8px'
-            }}>
-              ⚠️ 주의사항
-            </h4>
-            {currentAdvice.warnings.map((warning, index) => (
-              <div
-                key={index}
-                style={{
-                  ...typography.presets.body.small,
-                  color: 'white',
-                  marginBottom: '4px',
-                  paddingLeft: '8px'
-                }}
-              >
-                {warning}
-              </div>
-            ))}
-          </div>
-        )}
+        </div>
 
         {/* 액션 버튼 */}
-        <div style={{ display: 'flex', gap: '8px', marginTop: '16px' }}>
+        <div style={{
+          padding: '20px',
+          borderTop: `1px solid ${theme.colors.border}`,
+          display: 'flex',
+          gap: '12px'
+        }}>
           <button
-            onClick={() => updateProgress(currentSection, 5)}
+            onClick={moveToNextTip}
             style={{
-              ...typography.presets.button.small,
-              background: theme.positive,
+              ...typography.presets.button.normal,
+              background: `linear-gradient(135deg, ${theme.colors.positive}, ${theme.colors.accent})`,
               color: 'white',
               border: 'none',
-              padding: '8px 16px',
-              borderRadius: '6px',
+              padding: '12px 24px',
+              borderRadius: '8px',
               cursor: 'pointer',
-              flex: 1
+              flex: 2,
+              fontSize: '16px',
+              fontWeight: '600'
             }}
           >
-            💡 도움됐어요
+            ✨ 도움이 되었습니다!
           </button>
+          
           <button
-            onClick={() => setCurrentAdvice(getContextualAdvice())}
+            onClick={() => setCurrentAdviceIndex((currentAdviceIndex + 1) % currentAdviceList.length)}
             style={{
-              ...typography.presets.button.small,
-              background: theme.accent,
-              color: 'white',
-              border: 'none',
-              padding: '8px 16px',
-              borderRadius: '6px',
+              ...typography.presets.button.normal,
+              background: 'transparent',
+              color: theme.colors.accent,
+              border: `2px solid ${theme.colors.accent}`,
+              padding: '12px 20px',
+              borderRadius: '8px',
               cursor: 'pointer',
               flex: 1
             }}
           >
-            🔄 다른 조언
+            🔄 다른 팁
+          </button>
+          
+          <button
+            onClick={handleCloseClick}
+            style={{
+              ...typography.presets.button.normal,
+              background: 'transparent',
+              color: theme.colors.warning,
+              border: `2px solid ${theme.colors.warning}`,
+              padding: '12px 20px',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              flex: 1
+            }}
+          >
+            ⏸️ 나중에
           </button>
         </div>
       </div>
 
-      {/* 하단 정보 */}
-      <div style={{
-        background: theme.cardBg,
-        padding: '12px 16px',
-        borderTop: `1px solid ${theme.border}`,
-        textAlign: 'center'
-      }}>
+      {/* 닫기 확인 다이얼로그 */}
+      {showCloseConfirm && (
         <div style={{
-          ...typography.presets.caption,
-          color: typography.colors.muted
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          background: theme.colors.surface,
+          borderRadius: '12px',
+          padding: '24px',
+          boxShadow: theme.shadows.xl,
+          textAlign: 'center',
+          minWidth: '300px'
         }}>
-          🎯 현재 단계: {currentSection} | 👤 레벨: {userLevel}
+          <h4 style={{
+            ...typography.presets.heading.h4,
+            color: typography.colors.primary,
+            marginBottom: '16px'
+          }}>
+            정말 나가시겠어요?
+          </h4>
+          <p style={{
+            ...typography.presets.body.normal,
+            color: typography.colors.muted,
+            marginBottom: '20px'
+          }}>
+            현재 진도율: {Math.round(userProgress.overall)}%<br/>
+            지금 나가시면 진도가 저장됩니다.
+          </p>
+          <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
+            <button
+              onClick={() => {
+                setShowCloseConfirm(false);
+                if (onClose) onClose();
+              }}
+              style={{
+                background: theme.colors.warning,
+                color: 'white',
+                border: 'none',
+                padding: '10px 20px',
+                borderRadius: '6px',
+                cursor: 'pointer'
+              }}
+            >
+              나가기
+            </button>
+            <button
+              onClick={() => setShowCloseConfirm(false)}
+              style={{
+                background: theme.colors.accent,
+                color: 'white',
+                border: 'none',
+                padding: '10px 20px',
+                borderRadius: '6px',
+                cursor: 'pointer'
+              }}
+            >
+              계속 공부하기
+            </button>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };

@@ -1,7 +1,8 @@
 import React from 'react';
 import { HashRouter as Router, Routes, Route } from 'react-router-dom';
-import MainPage from './pages/MainPage';
+import SimpleMainPage from './pages/SimpleMainPage';
 import NewsDetailPage from './pages/NewsDetailPage';
+import StockNewsPage from './pages/StockNewsPage';
 import ErrorBoundary from './components/ErrorBoundary';
 import './App.css';
 
@@ -11,9 +12,10 @@ function App() {
       <div className="App">
         <Router>
           <Routes>
-            <Route path="/" element={<MainPage />} />
+            <Route path="/" element={<SimpleMainPage />} />
             <Route path="/news/:id" element={<NewsDetailPage />} />
-            <Route path="*" element={<MainPage />} />
+            <Route path="/news" element={<StockNewsPage />} />
+            <Route path="*" element={<SimpleMainPage />} />
           </Routes>
         </Router>
       </div>

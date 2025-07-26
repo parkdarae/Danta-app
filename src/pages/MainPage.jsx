@@ -1,39 +1,31 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import CategoryNavigation from '../components/CategoryNavigation';
 import CharacterReaction from '../components/CharacterReaction';
-import EmotionButtons from '../components/EmotionButtons';
-import TodayPicks from '../components/TodayPicks';
+import TodayIssueStocks from '../components/TodayIssueStocks';
 import AIJudgement from '../components/AIJudgement';
 import StockChart from '../components/StockChart';
-import RealtimeNewsSection from '../components/RealtimeNewsSection';
-import AIChatSection from '../components/AIChatSection';
-import AIProfileReport from '../components/AIProfileReport';
-import PsyScoreSection from '../components/PsyScoreSection';
-import InvestmentMemo from '../components/InvestmentMemo';
-import VolumeAnomalyTracker from '../components/VolumeAnomalyTracker';
-import MyPurchaseList from '../components/MyPurchaseList';
-import RealtimeFetchDemo from '../components/RealtimeFetchDemo';
-import DataBackupRestore from '../components/DataBackupRestore';
-import TutorialHelper from '../components/TutorialHelper';
+import StockSelector from '../components/StockSelector';
+import EmotionButtons from '../components/EmotionButtons';
+import NewsSection from '../components/NewsSection';
 import CustomDashboard from '../components/CustomDashboard';
-import DataExportPanel from '../components/DataExportPanel';
 import DataMiningFramework from '../components/DataMiningFramework';
+import VolumeAnomalyTracker from '../components/VolumeAnomalyTracker';
+import PortfolioSummary from '../components/PortfolioSummary';
+import InvestmentMemo from '../components/InvestmentMemo';
+import PsyScoreSection from '../components/PsyScoreSection';
+import NewsTrendSummary from '../components/NewsTrendSummary';
 import AutoReportGenerator from '../components/AutoReportGenerator';
-import PerformanceMonitor from '../components/PerformanceMonitor';
-import SimpleTOSTable from '../components/SimpleTOSTable';
-import WatchlistManager from '../components/WatchlistManager';
-import PortfolioOCR from '../components/PortfolioOCR';
-import EnhancedNewsAnalyzer from '../components/EnhancedNewsAnalyzer';
-import EnhancedStockSearch from '../components/EnhancedStockSearch';
-import StockAlertSystem from '../components/StockAlertSystem';
+import DataBackupRestore from '../components/DataBackupRestore';
+import DataExportPanel from '../components/DataExportPanel';
+import AdvancedFrameworksPanel from '../components/AdvancedFrameworksPanel';
+import AIStockMentor from '../components/AIStockMentor';
+import PersonalizedInvestmentRecommendation from '../components/PersonalizedInvestmentRecommendation';
+import AIProfileReport from '../components/AIProfileReport';
 import EmotionalTradingTracker from '../components/EmotionalTradingTracker';
 import MetaCognitionReport from '../components/MetaCognitionReport';
-import KeywordToStockWorkflow from '../components/KeywordToStockWorkflow';
 import UserPage from '../components/UserPage';
 import EnhancedChaessaemAI from '../components/EnhancedChaessaemAI';
-import AIModelSettings from '../components/AIModelSettings';
-import MentalManagementJournal from '../components/MentalManagementJournal';
-import AIStockMentor from '../components/AIStockMentor';
+import PerformanceMonitor from '../components/PerformanceMonitor';
 import InteractiveGuide from '../components/InteractiveGuide';
 import { useChaessaemNotification, ChaessaemNotificationContainer } from '../components/ChaessaemNotification';
 import { useLocalStorage } from '../hooks/useLocalStorage';
@@ -53,15 +45,17 @@ function MainPage() {
   const [userPortfolio, setUserPortfolio] = useState([]);
   const [isFirstVisit, setIsFirstVisit] = useLocalStorage('is_first_visit', true);
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [generatedKeywords, setGeneratedKeywords] = useState([]);
+  const [showStudyPage, setShowStudyPage] = useLocalStorage('show_study_page', false);
   
   // isFirstVisit이 변경될 때 showOnboarding도 연동
   useEffect(() => {
     setShowOnboarding(isFirstVisit);
   }, [isFirstVisit]);
-  const [generatedKeywords, setGeneratedKeywords] = useState([]);
   
   const notification = useChaessaemNotification();
 
+  // 다크모드 토글
   const toggleDarkMode = useCallback(() => {
     setDarkMode(dm => !dm);
   }, [setDarkMode]);
@@ -87,6 +81,25 @@ function MainPage() {
     }
   }, []); // 빈 의존성 배열로 마운트 시에만 실행
 
+  // 프로필 생성 완료 시 투자 공부 페이지 표시
+  useEffect(() => {
+    const userProfile = JSON.parse(localStorage.getItem('user_profile') || '{}');
+    if (userProfile.name && !showStudyPage) {
+      // 프로필이 있고 아직 공부 페이지를 보지 않았다면 표시
+      setTimeout(() => {
+        setShowStudyPage(true);
+      }, 1000); // 1초 후 표시
+    }
+  }, [showStudyPage, setShowStudyPage]);
+
+  // 프로필 생성 완료 시 투자 공부 페이지 표시
+  useEffect(() => {
+    const userProfile = JSON.parse(localStorage.getItem('user_profile') || '{}');
+    if (userProfile.name && !showStudyPage) {
+      setShowStudyPage(true);
+    }
+  }, [showStudyPage, setShowStudyPage]);
+
   // 관심종목 변경 콜백
   const handleWatchlistChange = useCallback((newWatchlist) => {
     setUserWatchlist(newWatchlist);
@@ -111,85 +124,27 @@ function MainPage() {
       case 'trading':
         return (
           <>
-            <TutorialHelper darkMode={darkMode} />
-            <CharacterReaction emotion={emotion} darkMode={darkMode} />
-            <EmotionButtons onSelect={handleEmotion} darkMode={darkMode} />
-            <EnhancedStockSearch 
-              onStockSelect={(stockData) => setSelectedStock(stockData.name || stockData.symbol)} 
-              onWatchlistAdd={(stock) => {
-                if (!userWatchlist.includes(stock.symbol)) {
-                  setUserWatchlist([...userWatchlist, stock.symbol]);
-                }
-              }}
-              darkMode={darkMode}
-              selectedStock={selectedStock}
-            />
-            <WatchlistManager 
-              darkMode={darkMode}
+            <CustomDashboard darkMode={darkMode} />
+            {/* <TutorialHelper topic="trading" darkMode={darkMode} /> */}
+            <StockSelector onStockSelect={setSelectedStock} darkMode={darkMode} />
+            {/* <EnhancedStockSearch darkMode={darkMode} /> */}
+            <PortfolioSummary 
+              userWatchlist={userWatchlist}
               onWatchlistChange={handleWatchlistChange}
+              darkMode={darkMode} 
+            />
+            {/* <WatchlistManager 
+              userWatchlist={userWatchlist}
+              onWatchlistChange={handleWatchlistChange}
+              darkMode={darkMode} 
             />
             <SimpleTOSTable 
               darkMode={darkMode}
-              watchlist={userWatchlist}
             />
             <StockAlertSystem 
+              userWatchlist={userWatchlist}
               darkMode={darkMode}
-              watchlist={userWatchlist}
-            />
-            <div style={{ textAlign: 'center', marginBottom: 8, display: 'flex', justifyContent: 'center', gap: 8 }}>
-              <button
-                onClick={() => setChartType('5min')}
-                style={{
-                  background: chartType === '5min' ? accent : 'transparent',
-                  color: chartType === '5min' ? '#fff' : (darkMode ? accent : '#333'),
-                  border: `2px solid ${accent}`,
-                  borderRadius: '12px',
-                  padding: '0.5rem 1rem',
-                  cursor: 'pointer',
-                  fontSize: '0.9rem',
-                  fontWeight: '600',
-                  transition: 'all 0.3s'
-                }}
-              >
-                5분봉
-              </button>
-              <button
-                onClick={() => setChartType('1h')}
-                style={{
-                  background: chartType === '1h' ? accent : 'transparent',
-                  color: chartType === '1h' ? '#fff' : (darkMode ? accent : '#333'),
-                  border: `2px solid ${accent}`,
-                  borderRadius: '12px',
-                  padding: '0.5rem 1rem',
-                  cursor: 'pointer',
-                  fontSize: '0.9rem',
-                  fontWeight: '600',
-                  transition: 'all 0.3s'
-                }}
-              >
-                1시간봉
-              </button>
-              <button
-                onClick={() => setChartType('1d')}
-                style={{
-                  background: chartType === '1d' ? accent : 'transparent',
-                  color: chartType === '1d' ? '#fff' : (darkMode ? accent : '#333'),
-                  border: `2px solid ${accent}`,
-                  borderRadius: '12px',
-                  padding: '0.5rem 1rem',
-                  cursor: 'pointer',
-                  fontSize: '0.9rem',
-                  fontWeight: '600',
-                  transition: 'all 0.3s'
-                }}
-              >
-                일봉
-              </button>
-            </div>
-            <StockChart stock={selectedStock} period={chartType} darkMode={darkMode} />
-            <TodayPicks darkMode={darkMode} />
-            <AIJudgement darkMode={darkMode} />
-            <VolumeAnomalyTracker stock={selectedStock} darkMode={darkMode} />
+            /> */}
           </>
         );
       
@@ -223,11 +178,16 @@ function MainPage() {
       case 'portfolio':
         return (
           <>
-            <PortfolioOCR 
+            {/* <PortfolioOCR 
               darkMode={darkMode}
               onPortfolioUpdate={handlePortfolioUpdate}
             />
-            <MyPurchaseList darkMode={darkMode} />
+            <MyPurchaseList darkMode={darkMode} /> */}
+            <PortfolioSummary 
+              userWatchlist={userWatchlist}
+              onWatchlistChange={handleWatchlistChange}
+              darkMode={darkMode} 
+            />
             <InvestmentMemo darkMode={darkMode} />
             <div style={{
               marginTop: 24, 
@@ -288,12 +248,33 @@ function MainPage() {
       case 'ai-chat':
         return (
           <>
+            {/* <AIChatSection darkMode={darkMode} /> */}
             <EnhancedChaessaemAI 
               darkMode={darkMode}
-              userProfile={JSON.parse(localStorage.getItem('user_profile') || '{}')}
-              currentContext={`현재 선택된 종목: ${selectedStock || '없음'}`}
-              onResponse={(response) => console.log('채쌤 응답:', response)}
+              onResponse={(response) => console.log('AI Response:', response)}
             />
+            {/* <EnhancedNewsAnalyzer 
+              darkMode={darkMode}
+            />
+            <RealtimeNewsSection darkMode={darkMode} />
+            <RealtimeFetchDemo darkMode={darkMode} /> */}
+          </>
+        );
+        
+      case 'portfolio':
+        return (
+          <>
+            {/* <PortfolioOCR 
+              darkMode={darkMode}
+              onPortfolioUpdate={handlePortfolioUpdate}
+            />
+            <MyPurchaseList darkMode={darkMode} /> */}
+            <PortfolioSummary 
+              userWatchlist={userWatchlist}
+              onWatchlistChange={handleWatchlistChange}
+              darkMode={darkMode} 
+            />
+            <InvestmentMemo darkMode={darkMode} />
           </>
         );
       
@@ -338,7 +319,7 @@ function MainPage() {
     const emotionMessages = {
       excited: '와! 흥미진진한 투자 타이밍이네요! 하지만 너무 성급하지 마세요 😊',
       happy: '좋은 기분이네요! 수익이 날 때일수록 차분함을 유지하세요 ✨',
-      confident: '자신감이 넘치시네요! 과신은 금물, 항상 리스크 관리를 잊지 마세요 ��',
+      confident: '자신감이 넘치시네요! 과신은 금물, 항상 리스크 관리를 잊지 마세요 💰',
       worried: '걱정되시는군요. 이럴 때일수록 차분히 데이터를 분석해보세요 🤔',
       surprised: '놀라운 상황이군요! 예상치 못한 변동성에 대비하세요 😲',
       greed: '수익에 대한 욕심이 생기셨나요? 적절한 수익실현도 중요해요 💰',
@@ -457,17 +438,21 @@ function MainPage() {
       {/* 성능 모니터 */}
       <PerformanceMonitor darkMode={darkMode} />
       
-      {/* AI 주식 멘토 시스템 */}
-      <AIStockMentor
-        darkMode={darkMode}
-        currentSection={currentCategory}
-        userLevel="beginner"
-        keywords={generatedKeywords}
-        selectedStock={selectedStock}
-        isFirstVisit={isFirstVisit}
-        userProfile={JSON.parse(localStorage.getItem('user_profile') || '{}')}
-        data-guide="ai-mentor"
-      />
+      {/* AI 주식 멘토 시스템 (프로필 생성 후에만 표시) */}
+      {showStudyPage && (
+        <AIStockMentor
+          darkMode={darkMode}
+          currentSection={currentCategory}
+          userLevel="beginner"
+          keywords={generatedKeywords}
+          selectedStock={selectedStock}
+          isFirstVisit={isFirstVisit}
+          userProfile={JSON.parse(localStorage.getItem('user_profile') || '{}')}
+          isVisible={showStudyPage}
+          onClose={() => setShowStudyPage(false)}
+          data-guide="ai-mentor"
+        />
+      )}
       
       {/* 인터랙티브 가이드 */}
               <InteractiveGuide
