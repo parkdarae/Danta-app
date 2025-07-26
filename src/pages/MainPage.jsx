@@ -31,6 +31,7 @@ import EnhancedStockSearch from '../components/EnhancedStockSearch';
 import StockAlertSystem from '../components/StockAlertSystem';
 import EmotionalTradingTracker from '../components/EmotionalTradingTracker';
 import MetaCognitionReport from '../components/MetaCognitionReport';
+import KeywordToStockWorkflow from '../components/KeywordToStockWorkflow';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { STORAGE_KEYS, STOCKS } from '../utils/constants';
 
@@ -228,6 +229,17 @@ function MainPage() {
           </>
         );
       
+      case 'discovery':
+        return (
+          <>
+            <TutorialHelper darkMode={darkMode} />
+            <KeywordToStockWorkflow 
+              darkMode={darkMode}
+              onStockSelect={(stock) => setSelectedStock(stock.symbol || stock.name)}
+            />
+          </>
+        );
+      
       case 'tools':
         return (
           <>
@@ -345,6 +357,7 @@ function MainPage() {
               case 'news': return '📰 뉴스 정보';
               case 'portfolio': return '💼 포트폴리오';
               case 'psychology': return '🧠 감정 & 메타인지';
+              case 'discovery': return '🚀 키워드 종목 발굴';
               case 'tools': return '🛠️ 관리 도구';
               default: return '카테고리 선택';
             }

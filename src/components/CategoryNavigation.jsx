@@ -35,6 +35,12 @@ const CategoryNavigation = ({ currentCategory, onCategoryChange, darkMode = fals
       icon: '🎭'
     },
     {
+      id: 'discovery',
+      name: '🚀 키워드 종목 발굴',
+      description: '브레인스토밍, 동전주, 밈주식, 퀀트분석',
+      icon: '🔍'
+    },
+    {
       id: 'tools',
       name: '🛠️ 도구',
       description: '데이터관리, 설정, 튜토리얼',
