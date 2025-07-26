@@ -44,7 +44,7 @@ const CategoryNavigation = ({ currentCategory, onCategoryChange, darkMode = fals
     {
       id: 'psychology',
       name: '🧠 감정 & 메타인지',
-      description: '감정기록, 메타인지분석, 투자심리',
+      description: '감정기록, 메타인지분석, 골프+주식 멘탈 일지',
       icon: '🎭'
     },
     {

@@ -32,6 +32,7 @@ import KeywordToStockWorkflow from '../components/KeywordToStockWorkflow';
 import UserPage from '../components/UserPage';
 import EnhancedChaessaemAI from '../components/EnhancedChaessaemAI';
 import AIModelSettings from '../components/AIModelSettings';
+import MentalManagementJournal from '../components/MentalManagementJournal';
 import AIStockMentor from '../components/AIStockMentor';
 import InteractiveGuide from '../components/InteractiveGuide';
 import { useChaessaemNotification, ChaessaemNotificationContainer } from '../components/ChaessaemNotification';
@@ -258,6 +259,7 @@ function MainPage() {
             <EmotionButtons onSelect={handleEmotion} darkMode={darkMode} />
             <AIProfileReport darkMode={darkMode} />
             <PsyScoreSection darkMode={darkMode} />
+            <MentalManagementJournal darkMode={darkMode} />
           </>
         );
       
