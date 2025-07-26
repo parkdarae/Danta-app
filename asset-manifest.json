@@ -1,10 +1,10 @@
 {
   "files": {
-    "main.js": "/Danta-app/static/js/main.6ab9bcc2.js",
+    "main.js": "/Danta-app/static/js/main.d6781f8a.js",
     "index.html": "/Danta-app/index.html",
-    "main.6ab9bcc2.js.map": "/Danta-app/static/js/main.6ab9bcc2.js.map"
+    "main.d6781f8a.js.map": "/Danta-app/static/js/main.d6781f8a.js.map"
   },
   "entrypoints": [
-    "static/js/main.6ab9bcc2.js"
+    "static/js/main.d6781f8a.js"
   ]
 }
